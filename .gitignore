@@ -1,3 +1,7 @@
+# Derived runtime artifacts
+data/chroma_db/
+data/corpus.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
