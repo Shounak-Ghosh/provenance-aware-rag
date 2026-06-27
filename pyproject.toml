@@ -11,4 +11,6 @@ dependencies = [
     "openai>=2.44.0",
     "python-dotenv>=1.2.2",
     "sentence-transformers>=3.0.0",
+    "streamlit>=1.58.0",
+    "torchvision>=0.27.1",
 ]

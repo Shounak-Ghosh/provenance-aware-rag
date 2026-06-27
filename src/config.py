@@ -12,12 +12,15 @@ LLM_TEMPERATURE = 0
 
 SYSTEM_PROMPT = (
     "You are a precise research assistant. "
-    "Answer using only the provided context. Be concise."
+    "Prefer the provided context when it is relevant. "
+    "If the context does not address the question, answer from your general knowledge "
+    "and do not cite any chunk IDs. Be concise."
 )
 
 USER_PROMPT_TEMPLATE = """\
-Answer the following question using only the context passages below.
-Cite the chunk IDs that support your answer in square brackets, e.g. [2307.03172v2__chunk000].
+Answer the following question using the context passages below when they are relevant.
+If the context is not relevant to the question, answer from your general knowledge instead.
+Only cite chunk IDs (e.g. [2307.03172v2__chunk000]) when the context directly supports your answer.
 
 Question: {question}
 
