@@ -10,6 +10,19 @@ EMBED_MODEL_NAME = "BAAI/bge-small-en-v1.5"
 LLM_MODEL = os.getenv("LLM_MODEL", "gpt-4o-mini")  # set in .env; switch to gpt-4o for demo
 LLM_TEMPERATURE = 0
 
+# ── Provenance config (frozen Day 4) ─────────────────────────────────────────
+PUBLISHER_KEY_ID = "publisher_v1"
+SERVICE_KEY_ID   = "service_v1"
+
+KEYS_DIR                   = Path("data/keys")
+PUBLISHER_SIGNING_KEY_PATH = KEYS_DIR / "publisher.sk"
+PUBLISHER_VERIFY_KEY_PATH  = KEYS_DIR / "publisher.vk"
+SERVICE_SIGNING_KEY_PATH   = KEYS_DIR / "service.sk"
+SERVICE_VERIFY_KEY_PATH    = KEYS_DIR / "service.vk"
+
+ROOTS_PATH           = Path("data/roots.json")
+ATTESTATION_LOG_PATH = Path("data/attestation_log.jsonl")
+
 SYSTEM_PROMPT = (
     "You are a precise research assistant. "
     "Prefer the provided context when it is relevant. "

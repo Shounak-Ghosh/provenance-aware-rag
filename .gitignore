@@ -2,6 +2,9 @@
 data/chroma_db/
 data/corpus.json
 
+# Ed25519 private keys — never commit
+data/keys/*.sk
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
