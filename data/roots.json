@@ -1,1 +1,254 @@
-{}
+{
+  "2606.26094v1": {
+    "doc_id": "2606.26094v1",
+    "merkle_root": "49fecc657c6ab693b5078b9beb804765e57145b45d65f163f1773e5744f93f3d",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:11.404293+00:00"
+  },
+  "2606.26091v1": {
+    "doc_id": "2606.26091v1",
+    "merkle_root": "c8f51a1267389fa0925155a87c61e5aaa98f0bbe241531a0decdfc2aae602f1a",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:11.459287+00:00"
+  },
+  "2606.26080v1": {
+    "doc_id": "2606.26080v1",
+    "merkle_root": "1bc62b3b666bf8f5e8d7085a39ffa92be5e460b6acb768348e4c2d1c76faf608",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:11.505741+00:00"
+  },
+  "2606.26079v1": {
+    "doc_id": "2606.26079v1",
+    "merkle_root": "7477b8feaf21b6bd4682caa17816a7962891f839e00ac61c333b73438e428717",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:11.811801+00:00"
+  },
+  "2606.26071v1": {
+    "doc_id": "2606.26071v1",
+    "merkle_root": "98242deeabbba5988082fff2f598bad20339203244bc343e6bb969b0c93a844e",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:11.874169+00:00"
+  },
+  "2606.26057v1": {
+    "doc_id": "2606.26057v1",
+    "merkle_root": "7375beb810b7c8088579172aa2cbb4ac1d00915f2c7368614166ad538ad50e54",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:11.912712+00:00"
+  },
+  "2606.26053v1": {
+    "doc_id": "2606.26053v1",
+    "merkle_root": "c2b10ae45916980e194341e48baf09d36a256893ca8b51d5e7ee79e58b05306f",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:11.954687+00:00"
+  },
+  "2606.26050v1": {
+    "doc_id": "2606.26050v1",
+    "merkle_root": "4178175c00768a04fff219bc8b02c7e61cf10595325dc0a5ee9d4c1f7e39008f",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.055299+00:00"
+  },
+  "2606.26037v1": {
+    "doc_id": "2606.26037v1",
+    "merkle_root": "14a9af39ac6fc4d5c05933aacd1cf218ad88312b4e7eac4ee0dda3f32136ed00",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.084896+00:00"
+  },
+  "2606.26027v1": {
+    "doc_id": "2606.26027v1",
+    "merkle_root": "05d5cc1e5c5f556784738ae8da7e1b2fa36be4e1bedd88de0051b2e30df84672",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.118686+00:00"
+  },
+  "2606.26002v1": {
+    "doc_id": "2606.26002v1",
+    "merkle_root": "ffb62c73ac05c0c541aa1ad2874d91e71246dc2ed2c92aa2865f77ebf34a5086",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.154123+00:00"
+  },
+  "2606.25996v1": {
+    "doc_id": "2606.25996v1",
+    "merkle_root": "41f93314e0add9cc0ae6e400d5a3a4ce8c5d0fedf9a03ad371a5dc3c3d35ac36",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.196203+00:00"
+  },
+  "2606.25987v1": {
+    "doc_id": "2606.25987v1",
+    "merkle_root": "b72414364a72477981a2d71e036213e6becebf31e3a547864d1383ac3f4b100b",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.238862+00:00"
+  },
+  "2606.25986v1": {
+    "doc_id": "2606.25986v1",
+    "merkle_root": "7d17edfa51f5406943fbfdbbd056ea7d6ffd76956be97427eb0842ed83604c6f",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.267316+00:00"
+  },
+  "2606.25984v1": {
+    "doc_id": "2606.25984v1",
+    "merkle_root": "63d46b07c8f4867ec7173cea10eeeb1e5c302fdebfb9c916927b32944e2aae88",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.312120+00:00"
+  },
+  "2606.25978v1": {
+    "doc_id": "2606.25978v1",
+    "merkle_root": "a9f5575413814f62147b3409f7aa1e3273d578a093a67456af08d1c992cfcadb",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.342966+00:00"
+  },
+  "2606.25975v1": {
+    "doc_id": "2606.25975v1",
+    "merkle_root": "e905c959c10b237e5248da1f9cbe1e816db3c8c3dd13cee6c7fcfce0a1dee5d1",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.379250+00:00"
+  },
+  "2606.26083v1": {
+    "doc_id": "2606.26083v1",
+    "merkle_root": "70891fc40a97e2eeda94a5de203d7d79251ef3ef9d3a243112ac34d0293a63e6",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.401257+00:00"
+  },
+  "2606.26062v1": {
+    "doc_id": "2606.26062v1",
+    "merkle_root": "c6af6c67c5e1b0d9da8f18eb4cf26740ca747969a1f2357890eee1cd0de962d6",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.448145+00:00"
+  },
+  "2606.26041v1": {
+    "doc_id": "2606.26041v1",
+    "merkle_root": "f4b1476c453ff59704374f3a759ca39bf62790b4eec7d20b7270a21769a11af5",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.507072+00:00"
+  },
+  "2606.26040v1": {
+    "doc_id": "2606.26040v1",
+    "merkle_root": "3f9d8133e7bae4b1fd189236e21bad2cc546bf4fc38b0b5f1bde92eed82bf3e5",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.545396+00:00"
+  },
+  "2606.26036v1": {
+    "doc_id": "2606.26036v1",
+    "merkle_root": "59376ce5c7a706be7322c366000e0821cfbdc9c7bbe97f3d9d56a0ce0c13e22a",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.576967+00:00"
+  },
+  "2606.26015v1": {
+    "doc_id": "2606.26015v1",
+    "merkle_root": "bbb99b3bcdd1d12112d499dd580a0ba95c530d4e22cf69c95dd18c9b280fb543",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.608525+00:00"
+  },
+  "2606.26003v1": {
+    "doc_id": "2606.26003v1",
+    "merkle_root": "391b911a5990de7f0ba42aa4b09bbf8d8f0162d438c11ac56354ddb5f50d7375",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.629867+00:00"
+  },
+  "2606.25990v1": {
+    "doc_id": "2606.25990v1",
+    "merkle_root": "b66de62edaf9c28b487525c221f26942d20731da77d62ca54e6c5a56341d181c",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.670563+00:00"
+  },
+  "2606.25935v1": {
+    "doc_id": "2606.25935v1",
+    "merkle_root": "b4a217d0fddc1572f77ad3e06cafcfa24a5573dce6e1dccd745b3c8ad4ebf27a",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.707353+00:00"
+  },
+  "2606.25821v1": {
+    "doc_id": "2606.25821v1",
+    "merkle_root": "b6c14c351f891412b83c44b8dc23a4da1ddc1f0a88dfa969675758c2f7b9b6fd",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.756759+00:00"
+  },
+  "2606.25819v1": {
+    "doc_id": "2606.25819v1",
+    "merkle_root": "d8e3e92170221f41062c76a0146a07573f849ee431aa4d0014f144a1cfe4e999",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.778671+00:00"
+  },
+  "2606.25787v1": {
+    "doc_id": "2606.25787v1",
+    "merkle_root": "4dd93203964a77e6cff0ce8d26416f85977a9c25f4723daa2a10e4efeb460b2b",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.813940+00:00"
+  },
+  "2606.26078v1": {
+    "doc_id": "2606.26078v1",
+    "merkle_root": "0db52b8c6b5b7439e4044bbc233a5531407eb2d05c48a05fab1939ae60c868e8",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.850544+00:00"
+  },
+  "2606.26059v1": {
+    "doc_id": "2606.26059v1",
+    "merkle_root": "46001dfcd989ae1f5c5cb6fa60cc56229b7e4c31e00bcb3e7537fdd01289b392",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.889066+00:00"
+  },
+  "2606.26029v1": {
+    "doc_id": "2606.26029v1",
+    "merkle_root": "18c22ac916eb86f51478e8ae1f40b0025d4999f8822c6848a46a23c1c7e392f2",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.911571+00:00"
+  },
+  "2606.26028v1": {
+    "doc_id": "2606.26028v1",
+    "merkle_root": "1c665e91258cd2fc4d1ad6d5413bdc8ff2402c3ca3b9d1cbd46140b18a62a587",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.949110+00:00"
+  },
+  "2606.26006v1": {
+    "doc_id": "2606.26006v1",
+    "merkle_root": "2a8cab6d6db59c478d6552b711bf5d73a273406d804b7daa13419b8b3eb59e3b",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:12.983469+00:00"
+  },
+  "2606.25997v1": {
+    "doc_id": "2606.25997v1",
+    "merkle_root": "7ecaf023fb59a7e39b594d31dc14ead4e402cacfa3c340821eaec112f8528d65",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:13.021915+00:00"
+  },
+  "2606.25973v1": {
+    "doc_id": "2606.25973v1",
+    "merkle_root": "5794e9884691890a33cf42208bf3ef51070b26393711cea3879a04ed66b2bf4b",
+    "root_signature": "",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-06-29T22:30:13.051250+00:00"
+  }
+}

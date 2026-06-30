@@ -1,12 +1,15 @@
+import hashlib
 import json
 import logging
+from datetime import datetime, timezone
 
 import arxiv
 import chromadb
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from sentence_transformers import SentenceTransformer
 
-from src.config import CHUNK_OVERLAP, CHUNK_SIZE, CORPUS_PATH
+from src.config import CHUNK_OVERLAP, CHUNK_SIZE, CORPUS_PATH, PUBLISHER_KEY_ID, ROOTS_PATH
+from src.merkle import compute_root
 
 
 def fetch_corpus() -> list[dict]:
@@ -73,8 +76,16 @@ def ingest(
     splitter change would silently invalidate every stored hash.
     """
     if collection.count() > 0:
-        logging.info(
-            "Collection already has %d chunks — skipping ingest", collection.count()
+        first = collection.get(limit=1, include=["metadatas"])
+        if first["metadatas"] and "sha256" in first["metadatas"][0]:
+            logging.info(
+                "Collection already has %d chunks with provenance — skipping ingest",
+                collection.count(),
+            )
+            return
+        logging.warning(
+            "Collection exists without provenance fields. "
+            "Delete data/chroma_db/ and re-run to backfill hashes."
         )
         return
 
@@ -89,14 +100,21 @@ def ingest(
             continue
         chunk_ids = [f"{paper['doc_id']}__chunk{j:03d}" for j in range(len(chunks))]
         embeddings = embed_model.encode(chunks, normalize_embeddings=True).tolist()
+
+        # ── provenance write hook ─────────────────────────────────────────────
+        chunk_hashes = [hashlib.sha256(c.encode()).hexdigest() for c in chunks]
+        merkle_root_hex = compute_root(chunk_hashes)
+
         metadatas = [
             {
-                "chunk_id": chunk_ids[j],
-                "doc_id": paper["doc_id"],
-                "title": paper["title"],
-                "authors": ", ".join(paper["authors"]),
-                "published": paper["published"],
-                "chunk_index": j,
+                "chunk_id":     chunk_ids[j],
+                "doc_id":       paper["doc_id"],
+                "title":        paper["title"],
+                "authors":      ", ".join(paper["authors"]),
+                "published":    paper["published"],
+                "chunk_index":  j,
+                "sha256":       chunk_hashes[j],
+                "merkle_index": j,
             }
             for j in range(len(chunks))
         ]
@@ -106,6 +124,18 @@ def ingest(
             embeddings=embeddings,
             metadatas=metadatas,
         )
+
+        roots: dict = {}
+        if ROOTS_PATH.exists():
+            roots = json.loads(ROOTS_PATH.read_text())
+        roots[paper["doc_id"]] = {
+            "doc_id":           paper["doc_id"],
+            "merkle_root":      merkle_root_hex,
+            "root_signature":   "",
+            "publisher_key_id": PUBLISHER_KEY_ID,
+            "ingested_at":      datetime.now(timezone.utc).isoformat(),
+        }
+        ROOTS_PATH.write_text(json.dumps(roots, indent=2))
         logging.info(
             "[%d/%d] '%s' → %d chunk(s): %s",
             i + 1,
