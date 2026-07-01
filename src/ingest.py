@@ -8,7 +8,15 @@ import chromadb
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from sentence_transformers import SentenceTransformer
 
-from src.config import CHUNK_OVERLAP, CHUNK_SIZE, CORPUS_PATH, PUBLISHER_KEY_ID, ROOTS_PATH
+from src.config import (
+    CHUNK_OVERLAP,
+    CHUNK_SIZE,
+    CORPUS_PATH,
+    PUBLISHER_KEY_ID,
+    PUBLISHER_SIGNING_KEY_PATH,
+    ROOTS_PATH,
+)
+from src.crypto import load_signing_key, sign
 from src.merkle import compute_root
 
 
@@ -63,6 +71,22 @@ def fetch_corpus() -> list[dict]:
     return papers
 
 
+def _backfill_root_signatures() -> None:
+    """Sign any DocumentRecord in roots.json left unsigned by a prior ingest run."""
+    if not ROOTS_PATH.exists():
+        return
+    roots = json.loads(ROOTS_PATH.read_text())
+    unsigned = [doc_id for doc_id, rec in roots.items() if not rec["root_signature"]]
+    if not unsigned:
+        return
+    publisher_sk = load_signing_key(PUBLISHER_SIGNING_KEY_PATH)
+    for doc_id in unsigned:
+        root_hex = roots[doc_id]["merkle_root"]
+        roots[doc_id]["root_signature"] = sign(publisher_sk, bytes.fromhex(root_hex))
+    ROOTS_PATH.write_text(json.dumps(roots, indent=2))
+    logging.info("Signed %d previously-unsigned document root(s)", len(unsigned))
+
+
 def ingest(
     papers: list[dict],
     collection: chromadb.Collection,
@@ -78,6 +102,7 @@ def ingest(
     if collection.count() > 0:
         first = collection.get(limit=1, include=["metadatas"])
         if first["metadatas"] and "sha256" in first["metadatas"][0]:
+            _backfill_root_signatures()
             logging.info(
                 "Collection already has %d chunks with provenance — skipping ingest",
                 collection.count(),
@@ -93,6 +118,7 @@ def ingest(
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP
     )
+    publisher_sk = load_signing_key(PUBLISHER_SIGNING_KEY_PATH)
 
     for i, paper in enumerate(papers):
         chunks = splitter.split_text(paper["abstract"])
@@ -104,6 +130,7 @@ def ingest(
         # ── provenance write hook ─────────────────────────────────────────────
         chunk_hashes = [hashlib.sha256(c.encode()).hexdigest() for c in chunks]
         merkle_root_hex = compute_root(chunk_hashes)
+        root_signature = sign(publisher_sk, bytes.fromhex(merkle_root_hex))
 
         metadatas = [
             {
@@ -131,7 +158,7 @@ def ingest(
         roots[paper["doc_id"]] = {
             "doc_id":           paper["doc_id"],
             "merkle_root":      merkle_root_hex,
-            "root_signature":   "",
+            "root_signature":   root_signature,
             "publisher_key_id": PUBLISHER_KEY_ID,
             "ingested_at":      datetime.now(timezone.utc).isoformat(),
         }
