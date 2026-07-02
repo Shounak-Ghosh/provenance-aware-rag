@@ -3,8 +3,9 @@ import json
 import chromadb
 from sentence_transformers import SentenceTransformer
 
-from src.config import ROOTS_PATH
-from src.merkle import merkle_proof
+from src.config import PUBLISHER_VERIFY_KEY_PATH, ROOTS_PATH
+from src.crypto import load_verify_key
+from src.merkle import check_tamper, merkle_proof
 
 
 def retrieve(
@@ -17,13 +18,12 @@ def retrieve(
 
     Each returned dict includes: chunk_id, doc_id, title, authors, published,
     text, distance, sha256, merkle_index, merkle_path, merkle_root,
-    root_signature, publisher_key_id.
-
-    Proof verification (tamper detection) is the Day 8 read hook.
+    root_signature, publisher_key_id, tampered, tamper_reason.
     """
     roots: dict = {}
     if ROOTS_PATH.exists():
         roots = json.loads(ROOTS_PATH.read_text())
+    publisher_vk = load_verify_key(PUBLISHER_VERIFY_KEY_PATH)
 
     query_embedding = embed_model.encode([query], normalize_embeddings=True)[0].tolist()
     results = collection.query(
@@ -65,5 +65,6 @@ def retrieve(
         chunk["merkle_root"]      = doc_record.get("merkle_root", "")
         chunk["root_signature"]   = doc_record.get("root_signature", "")
         chunk["publisher_key_id"] = doc_record.get("publisher_key_id", "")
+        chunk["tampered"], chunk["tamper_reason"] = check_tamper(chunk, publisher_vk)
 
     return chunks

@@ -85,3 +85,33 @@ def verify_root_signature(record: DocumentRecord, vk: nacl.signing.VerifyKey) ->
     if not record.get("root_signature"):
         return False
     return verify(vk, bytes.fromhex(record["merkle_root"]), record["root_signature"])
+
+
+def check_tamper(chunk: dict, publisher_vk: nacl.signing.VerifyKey) -> tuple[bool, str]:
+    """Run the read-hook integrity check on a retrieve()-bundled chunk.
+
+    Checks, in order: content hash recompute, Merkle path membership, and
+    root signature validity. Returns (tampered, reason) — reason names the
+    first failed check, or "verified" if all three pass.
+    """
+    if not chunk.get("merkle_root"):
+        return True, "no signed root for document"
+
+    recomputed = hashlib.sha256(chunk["text"].encode()).hexdigest()
+    if recomputed != chunk["sha256"]:
+        return True, "content hash mismatch"
+
+    if not verify_proof(chunk["sha256"], chunk["merkle_path"], chunk["merkle_root"], chunk["merkle_index"]):
+        return True, "merkle proof failed"
+
+    record: DocumentRecord = {
+        "doc_id": chunk["doc_id"],
+        "merkle_root": chunk["merkle_root"],
+        "root_signature": chunk["root_signature"],
+        "publisher_key_id": chunk["publisher_key_id"],
+        "ingested_at": "",
+    }
+    if not verify_root_signature(record, publisher_vk):
+        return True, "root signature invalid"
+
+    return False, "verified"
