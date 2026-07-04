@@ -1,3 +1,4 @@
+import hashlib
 import os
 
 import streamlit as st
@@ -8,6 +9,7 @@ from sentence_transformers import SentenceTransformer
 from src.config import EMBED_MODEL_NAME
 from src.generate import generate, parse_citations
 from src.ingest import fetch_corpus, ingest
+from src.merkle import build_levels
 from src.retrieve import retrieve
 from src.store import corrupt_chunk, get_collection
 
@@ -83,12 +85,22 @@ def _refresh_chunks() -> None:
     st.session_state.chunks_by_id = {c["chunk_id"]: c for c in chunks}
 
 
-def _tamper_source(chunk_id: str) -> None:
+def _tamper_source_naive(chunk_id: str) -> None:
     corrupt_chunk(
         load_collection(),
         chunk_id,
         "This text has been maliciously altered.",
         update_hash=False,
+    )
+    _refresh_chunks()
+
+
+def _tamper_source_sophisticated(chunk_id: str) -> None:
+    corrupt_chunk(
+        load_collection(),
+        chunk_id,
+        "This text and its stored hash were both forged.",
+        update_hash=True,
     )
     _refresh_chunks()
 
@@ -110,6 +122,88 @@ def _render_chip(chunk: dict) -> None:
         f'<span class="chip {css_class}" title="{tooltip}">{label}</span>',
         unsafe_allow_html=True,
     )
+
+
+def _render_hash_diff(chunk: dict) -> None:
+    stored = chunk["sha256"]
+    recomputed = hashlib.sha256(chunk["text"].encode()).hexdigest()
+    ok = stored == recomputed
+    css = "chip-verified" if ok else "chip-tampered"
+    st.markdown(
+        f"**Layer 1 — Content hash** &nbsp; "
+        f"<span class='chip {css}'>{'✅ match' if ok else '❌ mismatch'}</span>",
+        unsafe_allow_html=True,
+    )
+    st.code(f"stored:     {stored}\nrecomputed: {recomputed}", language=None)
+
+
+def _render_merkle_tree(chunk: dict) -> None:
+    leaf_hashes = chunk["doc_leaf_hashes"]
+    levels = build_levels(leaf_hashes)  # levels[0]=leaves ... levels[-1]=[root]
+    recomputed_root = levels[-1][0]
+    signed_root = chunk["merkle_root"]
+    root_ok = recomputed_root == signed_root
+
+    # Walk the target index up through levels, marking self + sibling at each level.
+    idx = chunk["merkle_index"]
+    path_indices: list[tuple[int, int, bool]] = []
+    for level_i in range(len(levels) - 1):
+        sibling_idx = idx + 1 if idx % 2 == 0 else idx - 1
+        path_indices.append((level_i, idx, True))
+        path_indices.append((level_i, sibling_idx, False))
+        idx //= 2
+    path_indices.append((len(levels) - 1, 0, False))  # root
+
+    root_css = "chip-verified" if root_ok else "chip-tampered"
+    st.markdown(
+        f"**Layer 2 — Merkle proof / signed root** &nbsp; "
+        f"<span class='chip {root_css}'>"
+        f"{'✅ root matches' if root_ok else '❌ root mismatch'}</span>",
+        unsafe_allow_html=True,
+    )
+    for level_i in range(len(levels) - 1, -1, -1):  # root at top, leaves at bottom
+        level = levels[level_i]
+        # An odd-length level (below the root) gets its last node duplicated by
+        # build_levels() to form a pair — render that phantom duplicate as a
+        # ghost box so the pairing is visible instead of implicit.
+        is_padded = level_i < len(levels) - 1 and len(level) % 2 == 1
+        display_hashes = list(level) + ([level[-1]] if is_padded else [])
+        boxes = []
+        for node_i, node_hash in enumerate(display_hashes):
+            is_ghost = is_padded and node_i == len(level)
+            hit = next(
+                (t for (li, ni, t) in path_indices if li == level_i and ni == node_i),
+                None,
+            )
+            if level_i == len(levels) - 1:
+                cls = "mk-root-ok" if root_ok else "mk-root-bad"
+            elif hit is True:
+                cls = "mk-target"
+            elif hit is False:
+                cls = "mk-sibling"
+            else:
+                cls = ""
+            if is_ghost:
+                cls += " mk-ghost"
+                label = f"{node_hash[:8]}…"
+            else:
+                label = f"{node_hash[:8]}…"
+            boxes.append(f'<span class="mk-node {cls}">{label}</span>')
+        st.markdown(f'<div class="mk-level">{"".join(boxes)}</div>', unsafe_allow_html=True)
+    st.code(f"recomputed root: {recomputed_root}\nsigned root:     {signed_root}", language=None)
+
+
+def _render_signature_status(chunk: dict) -> None:
+    reason = chunk["tamper_reason"]
+    if reason == "verified":
+        status = f"✅ valid (publisher key: {chunk['publisher_key_id']})"
+    elif reason == "root signature invalid":
+        status = "❌ invalid"
+    elif reason in ("content hash mismatch", "merkle proof failed"):
+        status = "⏭️ not reached (short-circuited by an earlier layer)"
+    else:
+        status = "❌ no signed root for document"
+    st.markdown(f"**Layer 3 — Root signature** &nbsp; {status}")
 
 
 def _format_expander_label(position: int, chunk: dict) -> str:
@@ -134,6 +228,13 @@ st.markdown(
     .chip{display:inline-block;padding:2px 10px;border-radius:12px;font-size:0.85rem;font-weight:600;color:white;}
     .chip-verified{background:#1e7e34;}
     .chip-tampered{background:#c62828;}
+    .mk-level{display:flex;justify-content:center;gap:8px;margin:4px 0;flex-wrap:wrap;}
+    .mk-node{padding:3px 8px;border-radius:6px;font-family:monospace;font-size:0.75rem;border:2px solid #999;background:#f0f0f0;color:#333;}
+    .mk-target{border-color:#1565c0;font-weight:700;}
+    .mk-sibling{border-color:#f9a825;}
+    .mk-root-ok{background:#1e7e34;color:white;border-color:#1e7e34;}
+    .mk-root-bad{background:#c62828;color:white;border-color:#c62828;}
+    .mk-ghost{border-style:dashed;opacity:0.6;font-style:italic;}
     </style>""",
     unsafe_allow_html=True,
 )
@@ -176,14 +277,26 @@ if st.session_state.answer is not None:
                 similarity = 1.0 - chunk["distance"]
                 st.caption(f"Similarity: {similarity:.1%}  ·  chunk `{chunk_id}`")
 
-                col1, col2 = st.columns(2)
+                st.divider()
+                _render_hash_diff(chunk)
+                _render_merkle_tree(chunk)
+                _render_signature_status(chunk)
+                st.divider()
+
+                col1, col2, col3 = st.columns(3)
                 with col1:
-                    if st.button("🧪 Tamper this source", key=f"tamper_{chunk_id}"):
-                        _tamper_source(chunk_id)
+                    if st.button("🧪 Tamper (naive)", key=f"tamper_naive_{chunk_id}"):
+                        _tamper_source_naive(chunk_id)
                         st.rerun()
                 with col2:
+                    if st.button(
+                        "🧪🔧 Tamper (sophisticated)", key=f"tamper_sneaky_{chunk_id}"
+                    ):
+                        _tamper_source_sophisticated(chunk_id)
+                        st.rerun()
+                with col3:
                     if chunk["tampered"] and st.button(
-                        "🧹 Restore this source", key=f"restore_{chunk_id}"
+                        "🧹 Restore", key=f"restore_{chunk_id}"
                     ):
                         _restore_source(chunk_id)
                         st.rerun()
