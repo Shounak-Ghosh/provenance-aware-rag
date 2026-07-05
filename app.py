@@ -1,4 +1,5 @@
 import hashlib
+import json
 import os
 
 import streamlit as st
@@ -6,7 +7,15 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from sentence_transformers import SentenceTransformer
 
-from src.config import EMBED_MODEL_NAME
+from src.attestation import append_attestation, build_attestation, sign_attestation, verify_attestation
+from src.config import (
+    EMBED_MODEL_NAME,
+    LLM_MODEL,
+    SERVICE_KEY_ID,
+    SERVICE_SIGNING_KEY_PATH,
+    SERVICE_VERIFY_KEY_PATH,
+)
+from src.crypto import load_signing_key, load_verify_key
 from src.generate import generate, parse_citations
 from src.ingest import fetch_corpus, ingest
 from src.merkle import build_levels
@@ -51,6 +60,7 @@ def _init_session_state() -> None:
         "chunks_by_id",
         "last_question",
         "original_text_by_id",
+        "attestation",
     ):
         if key not in st.session_state:
             st.session_state[key] = None
@@ -66,6 +76,12 @@ def _run_query(question: str) -> None:
         answer = generate(question, chunks, openai_client)
         cited_ids = parse_citations(answer)
 
+        # ── provenance answer hook ──────────────────────────────────────────
+        attestation = build_attestation(question, answer, chunks, LLM_MODEL)
+        service_sk = load_signing_key(SERVICE_SIGNING_KEY_PATH)
+        attestation = sign_attestation(attestation, service_sk, SERVICE_KEY_ID)
+        append_attestation(attestation)
+
     # Write all keys atomically so reruns never see partial state.
     st.session_state.answer = answer
     st.session_state.chunks = chunks
@@ -73,6 +89,7 @@ def _run_query(question: str) -> None:
     st.session_state.chunks_by_id = {c["chunk_id"]: c for c in chunks}
     st.session_state.last_question = question
     st.session_state.original_text_by_id = {c["chunk_id"]: c["text"] for c in chunks}
+    st.session_state.attestation = attestation
 
 
 def _refresh_chunks() -> None:
@@ -206,6 +223,30 @@ def _render_signature_status(chunk: dict) -> None:
     st.markdown(f"**Layer 3 — Root signature** &nbsp; {status}")
 
 
+def _render_attestation(attestation: dict) -> None:
+    service_vk = load_verify_key(SERVICE_VERIFY_KEY_PATH)
+    valid = verify_attestation(attestation, service_vk)
+    css_class, label = (
+        ("chip-verified", "✅ answer attestation signed")
+        if valid
+        else ("chip-tampered", "❌ attestation signature invalid")
+    )
+    st.markdown(
+        f'<span class="chip {css_class}" '
+        f'title="Self-check only — see Day 11 standalone verifier for an independent check">'
+        f"{label}</span>",
+        unsafe_allow_html=True,
+    )
+    with st.expander("Attestation details"):
+        st.code(json.dumps(attestation, indent=2), language="json")
+        st.download_button(
+            "Download attestation.json",
+            data=json.dumps(attestation, indent=2),
+            file_name=f"attestation_{attestation['timestamp']}.json",
+            mime="application/json",
+        )
+
+
 def _format_expander_label(position: int, chunk: dict) -> str:
     title_short = chunk["title"][:55] + ("…" if len(chunk["title"]) > 55 else "")
     authors_str = chunk.get("authors", "")
@@ -254,6 +295,7 @@ if submitted and question.strip():
 if st.session_state.answer is not None:
     st.subheader("Answer")
     st.markdown(st.session_state.answer)
+    _render_attestation(st.session_state.attestation)
 
     cited_ids: list[str] = st.session_state.cited_ids or []
     chunks_by_id: dict = st.session_state.chunks_by_id or {}
