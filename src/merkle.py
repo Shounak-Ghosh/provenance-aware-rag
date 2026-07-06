@@ -115,3 +115,26 @@ def check_tamper(chunk: dict, publisher_vk: nacl.signing.VerifyKey) -> tuple[boo
         return True, "root signature invalid"
 
     return False, "verified"
+
+
+def attach_provenance(
+    chunk: dict,
+    doc_leaf_hashes: list[str],
+    doc_record: dict,
+    publisher_vk: nacl.signing.VerifyKey,
+) -> dict:
+    """Enrich a bare chunk dict (chunk_id/doc_id/text/sha256/merkle_index) in place
+    with merkle_path, doc_leaf_hashes, merkle_root, root_signature, publisher_key_id,
+    tampered, and tamper_reason — then return it.
+
+    Shared by retrieve() (query-time, chunk already in a list being built) and
+    src/verifier.py (post-hoc, chunk looked up fresh by content hash) so both
+    paths run the exact same bundling + check_tamper logic.
+    """
+    chunk["merkle_path"] = merkle_proof(doc_leaf_hashes, chunk["merkle_index"])
+    chunk["doc_leaf_hashes"] = doc_leaf_hashes
+    chunk["merkle_root"] = doc_record.get("merkle_root", "")
+    chunk["root_signature"] = doc_record.get("root_signature", "")
+    chunk["publisher_key_id"] = doc_record.get("publisher_key_id", "")
+    chunk["tampered"], chunk["tamper_reason"] = check_tamper(chunk, publisher_vk)
+    return chunk

@@ -5,7 +5,7 @@ from sentence_transformers import SentenceTransformer
 
 from src.config import PUBLISHER_VERIFY_KEY_PATH, ROOTS_PATH
 from src.crypto import load_verify_key
-from src.merkle import check_tamper, merkle_proof
+from src.merkle import attach_provenance
 
 
 def retrieve(
@@ -59,13 +59,6 @@ def retrieve(
 
     for chunk in chunks:
         doc_id = chunk["doc_id"]
-        leaf_hashes = doc_leaf_hashes[doc_id]
-        chunk["merkle_path"] = merkle_proof(leaf_hashes, chunk["merkle_index"])
-        chunk["doc_leaf_hashes"] = leaf_hashes
-        doc_record = roots.get(doc_id, {})
-        chunk["merkle_root"]      = doc_record.get("merkle_root", "")
-        chunk["root_signature"]   = doc_record.get("root_signature", "")
-        chunk["publisher_key_id"] = doc_record.get("publisher_key_id", "")
-        chunk["tampered"], chunk["tamper_reason"] = check_tamper(chunk, publisher_vk)
+        attach_provenance(chunk, doc_leaf_hashes[doc_id], roots.get(doc_id, {}), publisher_vk)
 
     return chunks
