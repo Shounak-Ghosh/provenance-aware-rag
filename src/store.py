@@ -39,6 +39,8 @@ def corrupt_chunk(
     (see SPRINT.md); only the stored text and hash are meant to move here.
     """
     result = collection.get(ids=[chunk_id], include=["metadatas", "embeddings"])
+    if not result["ids"]:
+        raise ValueError(f"chunk_id {chunk_id!r} not found in store — cannot tamper a chunk that doesn't exist")
     metadata = result["metadatas"][0]
     embedding = result["embeddings"][0]
     if update_hash:

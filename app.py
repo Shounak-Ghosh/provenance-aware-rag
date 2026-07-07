@@ -18,6 +18,7 @@ from src.config import (
 from src.crypto import load_signing_key, load_verify_key
 from src.generate import generate, parse_citations
 from src.ingest import fetch_corpus, ingest
+from src.intoto import decode_ite6_payload, sign_real_ite6_statement
 from src.merkle import build_levels
 from src.retrieve import retrieve
 from src.store import corrupt_chunk, get_collection
@@ -78,7 +79,14 @@ def _run_query(question: str) -> None:
 
         # ── provenance answer hook ──────────────────────────────────────────
         attestation = build_attestation(question, answer, chunks, LLM_MODEL)
-        service_sk = load_signing_key(SERVICE_SIGNING_KEY_PATH)
+        try:
+            service_sk = load_signing_key(SERVICE_SIGNING_KEY_PATH)
+        except FileNotFoundError:
+            st.error(
+                f"Service signing key not found at {SERVICE_SIGNING_KEY_PATH}. "
+                "Run `uv run python scripts/generate_keys.py` and restart the app."
+            )
+            st.stop()
         attestation = sign_attestation(attestation, service_sk, SERVICE_KEY_ID)
         append_attestation(attestation)
 
@@ -223,8 +231,12 @@ def _render_signature_status(chunk: dict) -> None:
     st.markdown(f"**Layer 3 — Root signature** &nbsp; {status}")
 
 
-def _render_attestation(attestation: dict) -> None:
-    service_vk = load_verify_key(SERVICE_VERIFY_KEY_PATH)
+def _render_attestation(attestation: dict, chunks: list[dict]) -> None:
+    try:
+        service_vk = load_verify_key(SERVICE_VERIFY_KEY_PATH)
+    except FileNotFoundError:
+        st.error(f"Service verify key not found at {SERVICE_VERIFY_KEY_PATH}.")
+        return
     valid = verify_attestation(attestation, service_vk)
     css_class, label = (
         ("chip-verified", "✅ answer attestation signed")
@@ -245,6 +257,24 @@ def _render_attestation(attestation: dict) -> None:
             file_name=f"attestation_{attestation['timestamp']}.json",
             mime="application/json",
         )
+        try:
+            service_sk = load_signing_key(SERVICE_SIGNING_KEY_PATH)
+            statement_envelope = sign_real_ite6_statement(attestation, chunks, service_sk, SERVICE_KEY_ID)
+            st.download_button(
+                "Download in-toto link (DSSE envelope)",
+                data=json.dumps(statement_envelope, indent=2),
+                file_name=f"ite6_statement_{attestation['timestamp']}.json",
+                mime="application/json",
+                help="Genuine in-toto Attestation Framework (ITE-6) Statement with a "
+                "Link predicate, DSSE-signed — verify with "
+                "`uv run python verify.py --verify-ite6-statement <file>`.",
+            )
+            with st.expander("Decoded in-toto statement (readability only — not a substitute for signature verification)"):
+                st.code(json.dumps(decode_ite6_payload(statement_envelope), indent=2), language="json")
+        except ImportError:
+            st.caption(
+                "Real in-toto-verifiable export unavailable — install with `uv sync --extra intoto`."
+            )
 
 
 def _format_expander_label(position: int, chunk: dict) -> str:
@@ -295,7 +325,7 @@ if submitted and question.strip():
 if st.session_state.answer is not None:
     st.subheader("Answer")
     st.markdown(st.session_state.answer)
-    _render_attestation(st.session_state.attestation)
+    _render_attestation(st.session_state.attestation, st.session_state.chunks or [])
 
     cited_ids: list[str] = st.session_state.cited_ids or []
     chunks_by_id: dict = st.session_state.chunks_by_id or {}

@@ -15,3 +15,16 @@ dependencies = [
     "streamlit>=1.58.0",
     "torchvision>=0.27.1",
 ]
+
+[project.optional-dependencies]
+# Genuine in-toto Attestation Framework (ITE-6) export/verification (see
+# src/intoto.py). Not needed for the rest of the app. Install with
+# `uv sync --extra intoto`.
+#   in-toto-attestation  Statement/ResourceDescriptor (protobuf) classes
+#   securesystemslib[crypto]  DSSE Envelope + key/signer objects (the
+#                              [crypto] extra pulls in `cryptography`,
+#                              needed directly for Ed25519PrivateKey)
+intoto = [
+    "in-toto-attestation>=0.9.3",
+    "securesystemslib[crypto]>=1.4.0",
+]

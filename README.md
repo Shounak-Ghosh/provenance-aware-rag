@@ -46,6 +46,9 @@ src/
   crypto.py    Ed25519 sign/verify via PyNaCl
   schema.py    TypedDicts: ChunkRecord, DocumentRecord, Attestation
   config.py    pinned constants (chunk size, model names, key paths, trust-anchor paths)
+  attestation.py  build_attestation(), sign/verify/append/load — answer hook (Day 10)
+  verifier.py     find_chunk_by_hash(), verify_chunk(), verify_answer_hash() — standalone verifier internals (Day 11)
+  intoto.py       sign_real_ite6_statement()/verify_real_ite6_statement()/decode_ite6_payload() — genuine in-toto Attestation Framework (ITE-6) export, optional extra (Day 12)
 
 scripts/
   generate_keys.py   one-time Ed25519 keygen
@@ -185,3 +188,63 @@ Exits `0` and prints ✅ on a fully verified answer; exits `1` and prints ❌
 with the specific failing check(s) the moment a source has been tampered,
 the attestation signature doesn't check out, or a cited chunk hash no longer
 exists in the store.
+
+### in-toto export
+
+Alongside the native signed attestation, the app and verifier can also
+produce a genuine **in-toto Attestation Framework (ITE-6)** Statement — a
+step toward the in-toto/TUF/gittuf line of provenance tooling this project
+is meant to bridge to, and the direct bridge to the Cappos / Secure Systems
+Lab conversation.
+
+`src/intoto.py::sign_real_ite6_statement()` / `verify_real_ite6_statement()`
+build and DSSE-sign a Statement matching the
+[in-toto attestation spec](https://github.com/in-toto/attestation/blob/main/spec/predicates/link.md)
+exactly: `{"_type": "https://in-toto.io/Statement/v1", "subject": [...],
+"predicateType": "https://in-toto.io/attestation/link/v0.3", "predicate":
+{"name", "command", "materials": [<ResourceDescriptor>, ...], "byproducts",
+"environment"}}`, using the `in-toto-attestation` package's protobuf-backed
+`Statement`/`ResourceDescriptor` classes and `securesystemslib`'s DSSE
+`Envelope` for signing — both reference implementations for their
+respective specs (ITE-6 and [DSSE](https://github.com/secure-systems-lab/dsse)).
+Confirmed working end-to-end (sign → verify → tamper → verify fails).
+
+```bash
+# In the Streamlit UI: "Download in-toto link"
+# — signed with the same service private key already used for the
+# ordinary attestation, at the same trust boundary (generation/render time).
+
+# Independently verify it, using only the service PUBLIC key:
+uv run python verify.py --verify-ite6-statement ite6_statement_....json
+```
+
+The downloaded file is a DSSE envelope — its actual Statement content sits
+base64-encoded inside a `payload` field, which isn't demo-readable as-is.
+`src/intoto.py::decode_ite6_payload()` decodes it (display only, not a
+verification step — pair with `verify_real_ite6_statement()` for that). In
+the UI, the decoded Statement is shown inline in an expander right below the
+download button; from the CLI, add `--show-statement`:
+
+```bash
+uv run python verify.py --verify-ite6-statement ite6_statement_....json --show-statement
+```
+
+Requires the optional `intoto` extra:
+
+```bash
+uv sync --extra intoto
+```
+
+If it isn't installed, the UI shows only the "Download attestation.json"
+button and a caption explaining how to enable the in-toto one.
+
+### Error handling
+
+`verify.py` and the Streamlit app fail with a clear, specific message (not a
+raw traceback) on the failure modes most likely to come up in a demo: a
+missing or malformed attestation file, a `--log-index` out of range, a
+missing signing/verify key (with a pointer to `scripts/generate_keys.py`),
+an empty or absent Chroma store, a missing `data/roots.json`, and a
+truncated/corrupt line in `data/attestation_log.jsonl` (skipped with a
+warning rather than crashing the whole log). See `docs/THREAT_MODEL.md` for
+what is *not* handled (key compromise, rotation, revocation) and why.

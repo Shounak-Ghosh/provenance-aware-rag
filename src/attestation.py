@@ -54,6 +54,20 @@ def append_attestation(attestation: dict, path: Path = ATTESTATION_LOG_PATH) -> 
 
 
 def load_attestations(path: Path = ATTESTATION_LOG_PATH) -> list[dict]:
+    """Load every attestation from the append-only log.
+
+    Skips and warns on a malformed line (e.g. left by a crash mid-write)
+    rather than failing the whole load — one bad line in this
+    ever-growing log shouldn't invalidate every other entry.
+    """
     if not path.exists():
         return []
-    return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+    entries = []
+    for i, line in enumerate(path.read_text().splitlines()):
+        if not line.strip():
+            continue
+        try:
+            entries.append(json.loads(line))
+        except json.JSONDecodeError:
+            print(f"WARNING: skipping malformed line {i} in {path} (corrupt or truncated write)")
+    return entries
