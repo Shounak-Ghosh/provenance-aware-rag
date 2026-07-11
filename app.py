@@ -245,7 +245,7 @@ def _render_attestation(attestation: dict, chunks: list[dict]) -> None:
     )
     st.markdown(
         f'<span class="chip {css_class}" '
-        f'title="Self-check only — see Day 11 standalone verifier for an independent check">'
+        f'title="Self-check only — independently confirmed below with the standalone verify.py CLI">'
         f"{label}</span>",
         unsafe_allow_html=True,
     )
@@ -291,7 +291,10 @@ def _format_expander_label(position: int, chunk: dict) -> str:
 _init_session_state()
 
 st.title("Provenance-Aware RAG")
-st.caption("Ask a question about recent AI/ML research. Cited sources expand on click.")
+st.caption(
+    "Ask a question about recent AI/ML research. Cited sources expand on click. "
+    "Press Enter to run the query — there's no submit button."
+)
 
 st.markdown(
     """<style>

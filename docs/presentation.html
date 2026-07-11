@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Provenance-Aware RAG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #fdfae7;
+      --primary: #1e2bfa;
+      --text: #111111;
+      --text-muted: #6b6b6b;
+      --text-light: #9a9a9a;
+      --accent-light: rgba(30, 43, 250, 0.08);
+      --accent-medium: rgba(30, 43, 250, 0.15);
+      --border: rgba(30, 43, 250, 0.2);
+      --card-bg: rgba(30, 43, 250, 0.04);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .deck {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 3.5vw 4vw 8.5vh 4vw;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(40px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      overflow: hidden;
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateX(0);
+      z-index: 10;
+    }
+
+    .slide.prev {
+      transform: translateX(-40px);
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    h1 {
+      font-size: clamp(2.8rem, 5vw, 4.2rem);
+      font-weight: 700;
+    }
+
+    h2 {
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      margin-bottom: 1.5rem;
+    }
+
+    h3 {
+      font-size: clamp(1.1rem, 1.8vw, 1.5rem);
+      font-weight: 500;
+      line-height: 1.3;
+    }
+
+    h4 {
+      font-size: clamp(0.85rem, 1.2vw, 1rem);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--primary);
+    }
+
+    p, li {
+      font-size: clamp(0.85rem, 1.1vw, 1.05rem);
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .slide-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2.5vh;
+      flex-shrink: 0;
+    }
+
+    .slide-header h4 {
+      margin: 0;
+    }
+
+    .slide-header .tag {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--primary);
+      background: var(--accent-light);
+      padding: 0.35rem 0.9rem;
+      border-radius: 100px;
+    }
+
+    .slide-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .nav-controls {
+      position: fixed;
+      bottom: 2.5vh;
+      right: 3vw;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      z-index: 100;
+    }
+
+    .nav-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: var(--bg);
+      color: var(--primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      font-size: 1.1rem;
+    }
+
+    .nav-btn:hover {
+      background: var(--primary);
+      color: var(--bg);
+      border-color: var(--primary);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .slide-counter {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      position: fixed;
+      bottom: 2.5vh;
+      left: 3vw;
+      z-index: 100;
+    }
+
+    .progress-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: var(--primary);
+      transition: width 0.4s ease;
+      z-index: 100;
+    }
+
+    .accent-line {
+      width: 60px;
+      height: 4px;
+      background: var(--primary);
+      border-radius: 2px;
+      margin-bottom: 1.5rem;
+    }
+
+    .accent-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    /* LAYOUT 1: Cover */
+    .layout-cover {
+      justify-content: center;
+      align-items: flex-start;
+      padding-left: 8vw;
+    }
+
+    .layout-cover h1 {
+      max-width: 55vw;
+      margin-bottom: 1.5rem;
+      line-height: 1.05;
+    }
+
+    .layout-cover .subtitle {
+      font-size: clamp(1rem, 1.5vw, 1.25rem);
+      color: var(--text-muted);
+      max-width: 42vw;
+      margin-bottom: 3rem;
+      font-weight: 400;
+    }
+
+    .layout-cover .meta {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.8rem;
+      color: var(--text-light);
+      letter-spacing: 0.05em;
+    }
+
+    .layout-cover .cover-decoration {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 35vw;
+      height: 100vh;
+      background: var(--accent-light);
+      clip-path: polygon(30% 0, 100% 0, 100% 100%, 0% 100%);
+    }
+
+    .layout-cover .cover-dots {
+      position: absolute;
+      bottom: 12vh;
+      right: 8vw;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      opacity: 0.25;
+    }
+
+    .layout-cover .cover-dots .dot {
+      width: 6px;
+      height: 6px;
+      background: var(--primary);
+      border-radius: 50%;
+    }
+
+    /* LAYOUT 2: Agenda */
+    .layout-agenda .agenda-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 1rem 3rem;
+      margin-top: 1rem;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .agenda-item {
+      display: flex;
+      gap: 1.2rem;
+      align-items: center;
+      padding: 1rem 1.2rem;
+      border-radius: 12px;
+      transition: background 0.2s ease;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .agenda-item:hover {
+      background: var(--card-bg);
+    }
+
+    .agenda-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1;
+      min-width: 36px;
+    }
+
+    .agenda-item h3 {
+      margin-bottom: 0.3rem;
+      font-size: clamp(1rem, 1.4vw, 1.2rem);
+    }
+
+    .agenda-item p {
+      font-size: clamp(0.8rem, 1vw, 0.95rem);
+      line-height: 1.5;
+    }
+
+    /* LAYOUT 4: Dashboard */
+    .layout-dashboard .slide-content {
+      justify-content: flex-start;
+    }
+
+    .layout-dashboard .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.2rem;
+      margin-top: 0.5rem;
+    }
+
+    .stat-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 1.4rem 1.5rem;
+      border-radius: 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+    }
+
+    .stat-cell .stat-top {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+
+    .stat-cell .stat-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1.1rem, 1.7vw, 1.4rem);
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1;
+    }
+
+    .stat-cell .stat-unit {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    .stat-cell .stat-name {
+      font-size: clamp(0.85rem, 1vw, 0.95rem);
+      color: var(--text);
+      line-height: 1.35;
+      font-weight: 500;
+    }
+
+    .stat-cell .stat-context {
+      font-size: 0.73rem;
+      color: var(--text-light);
+      line-height: 1.4;
+      padding-top: 0.4rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* LAYOUT 5: Two Column Split */
+    .layout-split .slide-content {
+      justify-content: flex-start;
+    }
+
+    .layout-split .split-body {
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 3.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .split-left, .split-right {
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+    }
+
+    .split-right {
+      padding-left: 2.5rem;
+      border-left: 2px solid var(--border);
+    }
+
+    .insight-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+      margin: 0;
+      counter-reset: insight;
+    }
+
+    .insight-list li {
+      position: relative;
+      padding-left: 2.6rem;
+      font-size: clamp(0.88rem, 1.05vw, 1rem);
+      color: var(--text);
+      line-height: 1.55;
+      counter-increment: insight;
+    }
+
+    .insight-list li::before {
+      content: counter(insight, decimal-leading-zero);
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--primary);
+      letter-spacing: 0.05em;
+      line-height: 1.7;
+    }
+
+    .split-highlight {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1rem, 1.4vw, 1.3rem);
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.4;
+      padding: 1.3rem 1.5rem;
+      background: var(--accent-light);
+      border-radius: 12px;
+      border-left: 4px solid var(--primary);
+    }
+
+    .split-highlight cite {
+      display: block;
+      margin-top: 0.7rem;
+      font-style: normal;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .mini-stat-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      padding-top: 0.4rem;
+    }
+
+    .mini-stat {
+      padding: 0.9rem 1rem;
+      border-radius: 10px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+    }
+
+    .mini-stat .mini-val {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1;
+    }
+
+    .mini-stat .mini-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+      line-height: 1.35;
+    }
+
+    /* LAYOUT 6: Horizontal Bar Ranking */
+    .layout-bars .bars-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1.1rem;
+      margin-top: 0.5rem;
+    }
+
+    .bar-item {
+      display: grid;
+      grid-template-columns: minmax(220px, 34%) 1fr auto;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.6rem 0;
+    }
+
+    .bar-label {
+      font-size: clamp(0.85rem, 1.15vw, 1.05rem);
+      color: var(--text);
+      font-weight: 600;
+      line-height: 1.3;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .bar-note {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+      line-height: 1.45;
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+    }
+
+    .bar-track {
+      height: 28px;
+      background: var(--accent-light);
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 6px;
+      transition: width 0.8s ease;
+    }
+
+    .bar-pct {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--primary);
+      min-width: 70px;
+      text-align: right;
+    }
+
+    /* LAYOUT 8: Timeline */
+    .layout-timeline .timeline-track {
+      display: flex;
+      gap: 1.5rem;
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
+
+    .timeline-step {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+    }
+
+    .timeline-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 28px;
+      right: -0.75rem;
+      width: 1.5rem;
+      height: 2px;
+      background: var(--border);
+    }
+
+    .step-circle {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .timeline-step:nth-child(2) .step-circle { opacity: 0.85; }
+    .timeline-step:nth-child(3) .step-circle { opacity: 0.7; }
+    .timeline-step:nth-child(4) .step-circle { opacity: 0.55; }
+
+    .step-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(0.95rem, 1.4vw, 1.15rem);
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+    }
+
+    .step-desc {
+      font-size: clamp(0.75rem, 1vw, 0.9rem);
+      color: var(--text-muted);
+      line-height: 1.5;
+      max-width: 230px;
+    }
+
+    /* LAYOUT 8B: Architecture Diagram */
+    .layout-architecture .slide-content {
+      justify-content: flex-start;
+    }
+
+    .arch-diagram {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 3rem;
+      flex: 1;
+      margin-top: 0.5rem;
+      min-height: 0;
+    }
+
+    .arch-flow {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.3rem;
+    }
+
+    .arch-source {
+      padding: 0.6rem 1.2rem;
+      border-radius: 10px;
+      border: 1.5px dashed var(--text-light);
+      text-align: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .arch-arrow {
+      text-align: center;
+      color: var(--text-light);
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    .arch-stage {
+      padding: 0.8rem 1.3rem;
+      border-radius: 12px;
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+    }
+
+    .arch-stage-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+      color: var(--primary);
+      margin-bottom: 0.4rem;
+    }
+
+    .arch-files {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.45rem;
+    }
+
+    .arch-file {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--primary);
+      background: var(--accent-light);
+      padding: 0.18rem 0.55rem;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .arch-desc {
+      font-size: clamp(0.74rem, 0.9vw, 0.82rem);
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .arch-side {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      padding-left: 2rem;
+      border-left: 2px solid var(--border);
+    }
+
+    .arch-anchor {
+      padding: 1.1rem 1.3rem;
+      border-radius: 12px;
+      background: var(--accent-light);
+      border: 1.5px solid var(--border);
+    }
+
+    .arch-anchor-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text);
+      margin-bottom: 0.7rem;
+    }
+
+    .arch-anchor-title span {
+      font-weight: 400;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .arch-anchor ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .arch-anchor ul li {
+      font-size: clamp(0.76rem, 0.92vw, 0.85rem);
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .arch-verifier {
+      padding: 1.1rem 1.3rem;
+      border-radius: 12px;
+      border: 1.5px dashed var(--primary);
+    }
+
+    .arch-verifier-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    /* LAYOUT 9: Detailed Analysis */
+    .layout-detail .detail-body {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem 3rem;
+      flex: 1;
+      margin-top: 0.5rem;
+      overflow: hidden;
+    }
+
+    .detail-col {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .detail-col-label {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: -0.4rem;
+    }
+
+    .detail-block {
+      padding: 1rem 1.2rem;
+      border-radius: 10px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+    }
+
+    .detail-block h3 {
+      font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+      margin-bottom: 0.6rem;
+      color: var(--text);
+    }
+
+    .detail-block p {
+      font-size: clamp(0.78rem, 1vw, 0.9rem);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* LAYOUT 10: Closing */
+    .layout-closing {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .layout-closing h1 {
+      margin-bottom: 1rem;
+    }
+
+    .layout-closing .closing-sub {
+      font-size: clamp(1rem, 1.5vw, 1.3rem);
+      color: var(--text-muted);
+      max-width: 48vw;
+      margin-bottom: 2.5rem;
+    }
+
+    .layout-closing .cta-btn {
+      display: inline-block;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--bg);
+      background: var(--primary);
+      padding: 0.9rem 2.2rem;
+      border-radius: 100px;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .layout-closing .cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(30, 43, 250, 0.25);
+    }
+
+    .layout-closing .closing-contact {
+      margin-top: 3rem;
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+
+    .layout-closing .closing-decoration {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 500px;
+      height: 500px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .layout-closing .closing-decoration-2 {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 360px;
+      height: 360px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    .keyboard-hint {
+      position: fixed;
+      bottom: 2.5vh;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.7rem;
+      color: var(--text-light);
+      z-index: 100;
+      opacity: 0.6;
+    }
+
+    @media (max-height: 700px) {
+      .slide { padding: 2.5vh 3vw; }
+      .layout-agenda .agenda-grid { gap: 0.8rem 2rem; }
+      .agenda-item { padding: 0.8rem; }
+      .metric-card { padding: 1rem; }
+      .layout-bars .bars-container { gap: 0.6rem; }
+      .bar-item { padding: 0.4rem 0; }
+      .detail-block { padding: 0.8rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="deck">
+
+    <!-- SLIDE 1: Cover -->
+    <div class="slide layout-cover active">
+      <div class="cover-decoration"></div>
+      <div class="cover-dots">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+      <div class="accent-line"></div>
+      <h1>Provenance-Aware<br>RAG</h1>
+      <p class="subtitle">Every citation cryptographically signed. Every answer independently verifiable. Tamper a source — watch it get caught, live.</p>
+      <p class="meta">Agentic Engineering Demo &nbsp;&middot;&nbsp; July 2026</p>
+    </div>
+
+    <!-- SLIDE 2: Agenda -->
+    <div class="slide layout-agenda">
+      <div class="slide-header">
+        <h4>What We'll Cover</h4>
+        <span class="tag">Agenda</span>
+      </div>
+      <div class="slide-content">
+        <div class="accent-line"></div>
+        <div class="agenda-grid">
+          <div class="agenda-item">
+            <span class="agenda-num">01</span>
+            <div>
+              <h3>Key Terms</h3>
+              <p>Hashing, Merkle trees, Merkle proofs, digital signatures, attestations — defined once, used everywhere after.</p>
+            </div>
+          </div>
+          <div class="agenda-item">
+            <span class="agenda-num">02</span>
+            <div>
+              <h3>Pipeline &amp; Architecture</h3>
+              <p>How the provenance layer wraps ingest, retrieve, and generate — and the exact modules and files behind each stage.</p>
+            </div>
+          </div>
+          <div class="agenda-item">
+            <span class="agenda-num">03</span>
+            <div>
+              <h3>Two Keys, Two Guarantees</h3>
+              <p>Why a publisher key and a service key are kept deliberately separate.</p>
+            </div>
+          </div>
+          <div class="agenda-item">
+            <span class="agenda-num">04</span>
+            <div>
+              <h3>What It Catches</h3>
+              <p>Three adversaries this system detects, and the exact mechanism that catches each one.</p>
+            </div>
+          </div>
+          <div class="agenda-item">
+            <span class="agenda-num">05</span>
+            <div>
+              <h3>What It Doesn't Claim</h3>
+              <p>The honest boundary: provenance, not truth. Named non-goals, not oversights.</p>
+            </div>
+          </div>
+          <div class="agenda-item">
+            <span class="agenda-num">06</span>
+            <div>
+              <h3>Applications &amp; Live Demo</h3>
+              <p>Where this pattern matters in the real world — then ask a question, tamper a source, watch it get caught, live.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Dashboard -> Key Terms Glossary -->
+    <div class="slide layout-dashboard">
+      <div class="slide-header">
+        <h4>Key Terms</h4>
+        <span class="tag">Glossary</span>
+      </div>
+      <div class="slide-content">
+        <h2>Six terms that cover everything on screen for the rest of this talk</h2>
+        <div class="stats-grid">
+          <div class="stat-cell">
+            <div class="stat-top">
+              <span class="stat-num">SHA-256</span>
+              <span class="stat-unit">hash function</span>
+            </div>
+            <div class="stat-name">Cryptographic fingerprint of data</div>
+            <div class="stat-context">One-way, fixed-length (256-bit) digest. Used to fingerprint every chunk of text at ingestion.</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-top">
+              <span class="stat-num">Merkle Tree</span>
+              <span class="stat-unit">data structure</span>
+            </div>
+            <div class="stat-name">Binary tree of hashes committing to a document</div>
+            <div class="stat-context">Each leaf = hash of one chunk. Each parent = hash of its two children. The root commits to all of them, in order.</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-top">
+              <span class="stat-num">Merkle Proof</span>
+              <span class="stat-unit">sibling path</span>
+            </div>
+            <div class="stat-name">Proof one chunk belongs to the signed set</div>
+            <div class="stat-context">The sibling hashes from a leaf up to the root — proves inclusion without re-hashing every other chunk.</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-top">
+              <span class="stat-num">Ed25519</span>
+              <span class="stat-unit">signature scheme</span>
+            </div>
+            <div class="stat-name">Elliptic-curve digital signature (via PyNaCl)</div>
+            <div class="stat-context">A private signing key produces a signature only its paired public key can check — unforgeable without that key.</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-top">
+              <span class="stat-num">Attestation</span>
+              <span class="stat-unit">signed claim</span>
+            </div>
+            <div class="stat-name">Binding of an output to its exact inputs</div>
+            <div class="stat-context">Binds answer hash + cited chunk hashes + query hash + model, signed by the service key — non-repudiable.</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-top">
+              <span class="stat-num">in-toto / DSSE</span>
+              <span class="stat-unit">open standard</span>
+            </div>
+            <div class="stat-name">Supply-chain provenance statement (ITE-6)</div>
+            <div class="stat-context">A spec-compliant, DSSE-signed export — the bridge to the in-toto / TUF / sigstore ecosystem.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Timeline -> Pipeline -->
+    <div class="slide layout-timeline">
+      <div class="slide-header">
+        <h4>Architecture</h4>
+        <span class="tag">Pipeline</span>
+      </div>
+      <div class="slide-content">
+        <h2>The provenance layer wraps standard RAG at three points, untouched otherwise</h2>
+        <div class="timeline-track">
+          <div class="timeline-step">
+            <div class="step-circle">1</div>
+            <div class="step-title">Ingest</div>
+            <div class="step-desc">SHA-256 each chunk, build the per-document Merkle tree, sign the root with the publisher key.</div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-circle">2</div>
+            <div class="step-title">Retrieve</div>
+            <div class="step-desc">Embed the query, take top-N chunks, then re-hash + verify Merkle path + verify root signature for each.</div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-circle">3</div>
+            <div class="step-title">Generate</div>
+            <div class="step-desc">LLM answers with inline citations; bind chunk hashes + answer hash + query hash, sign with the service key.</div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-circle">4</div>
+            <div class="step-title">Verify</div>
+            <div class="step-desc">A standalone process re-runs the same checks offline, using only the two public keys.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: Architecture diagram -->
+    <div class="slide layout-architecture">
+      <div class="slide-header">
+        <h4>Architecture</h4>
+        <span class="tag">Code Map</span>
+      </div>
+      <div class="slide-content">
+        <h2>Four pipeline stages, a trust anchor kept outside the store, and a standalone verifier</h2>
+        <div class="arch-diagram">
+          <div class="arch-flow">
+            <div class="arch-source">data/corpus.json &mdash; frozen arXiv corpus (36 papers, fetched once)</div>
+            <div class="arch-arrow">&darr;</div>
+            <div class="arch-stage">
+              <div class="arch-stage-title">Ingest</div>
+              <div class="arch-files"><span class="arch-file">ingest.py</span><span class="arch-file">merkle.py</span><span class="arch-file">crypto.py</span></div>
+              <div class="arch-desc">Fetch &middot; chunk &middot; embed &middot; SHA-256 each chunk &middot; build per-doc Merkle tree &middot; sign root with the publisher key</div>
+            </div>
+            <div class="arch-arrow">&darr;</div>
+            <div class="arch-stage">
+              <div class="arch-stage-title">Store</div>
+              <div class="arch-files"><span class="arch-file">store.py</span><span class="arch-file">schema.py</span></div>
+              <div class="arch-desc">Chroma vector DB holds chunk text + sha256 + merkle_index &mdash; gitignored, untrusted by design</div>
+            </div>
+            <div class="arch-arrow">&darr;</div>
+            <div class="arch-stage">
+              <div class="arch-stage-title">Retrieve</div>
+              <div class="arch-files"><span class="arch-file">retrieve.py</span><span class="arch-file">merkle.py</span></div>
+              <div class="arch-desc">Cosine top-N &middot; read hook re-hashes each chunk, verifies its Merkle path and the root signature</div>
+            </div>
+            <div class="arch-arrow">&darr;</div>
+            <div class="arch-stage">
+              <div class="arch-stage-title">Generate</div>
+              <div class="arch-files"><span class="arch-file">generate.py</span><span class="arch-file">attestation.py</span><span class="arch-file">intoto.py</span></div>
+              <div class="arch-desc">LLM answers with inline citations &middot; answer hook signs answer + chunk + query hashes with the service key</div>
+            </div>
+          </div>
+          <div class="arch-side">
+            <div class="arch-anchor">
+              <div class="arch-anchor-title">Trust anchor <span>(outside the vector store)</span></div>
+              <ul>
+                <li><span class="arch-file">roots.json</span> &mdash; signed Merkle roots, written by Ingest</li>
+                <li><span class="arch-file">attestation_log.jsonl</span> &mdash; signed answers, written by Generate</li>
+                <li><span class="arch-file">keys/*.vk</span> &mdash; public verify keys, committed to git</li>
+              </ul>
+            </div>
+            <div class="arch-verifier">
+              <div class="arch-verifier-title">verify.py</div>
+              <div class="arch-desc">Standalone verifier &middot; reads only the trust anchor + public keys &middot; no private key, no live app, no OpenAI key</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: Split -> Two keys, two guarantees -->
+    <div class="slide layout-split">
+      <div class="slide-header">
+        <h4>Trust Model</h4>
+        <span class="tag">Two Keys</span>
+      </div>
+      <div class="slide-content">
+        <h2>Two independent keys keep two questions separately answerable</h2>
+        <div class="split-body">
+          <div class="split-left">
+            <ul class="insight-list">
+              <li>The <strong>publisher key</strong> signs the Merkle root of each document at ingestion — attests to the origin and integrity of sources.</li>
+              <li>The <strong>service key</strong> signs each answer attestation at generation — attests to what the system did with those sources.</li>
+              <li>Separating them means "was a source altered?" and "was an answer forged?" are answerable independently.</li>
+              <li>Compromise of one key does not silently implicate the other.</li>
+              <li>Public keys (<code>.vk</code>) are committed as the trust anchor; private keys (<code>.sk</code>) are gitignored, never committed.</li>
+            </ul>
+          </div>
+          <div class="split-right">
+            <div class="split-highlight">
+              The trust anchor lives deliberately outside the vector store an attacker would tamper.
+              <cite>roots.json &middot; attestation_log.jsonl &middot; keys/*.vk</cite>
+            </div>
+            <div class="mini-stat-row">
+              <div class="mini-stat">
+                <div class="mini-val">2</div>
+                <div class="mini-label">Independent signing keys</div>
+              </div>
+              <div class="mini-stat">
+                <div class="mini-val">Ed25519</div>
+                <div class="mini-label">Signature scheme (PyNaCl)</div>
+              </div>
+              <div class="mini-stat">
+                <div class="mini-val">0</div>
+                <div class="mini-label">Shared private key material</div>
+              </div>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.55; margin: 0;">
+              Named scope boundary, not an oversight: keys are raw seeds on disk for this MVP — no HSM/KMS, rotation, or revocation log yet.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: Bars -> What it catches -->
+    <div class="slide layout-bars">
+      <div class="slide-header">
+        <h4>Threat Model</h4>
+        <span class="tag">What It Catches</span>
+      </div>
+      <div class="slide-content">
+        <h2>Three adversaries, three independent detections</h2>
+        <div class="bars-container">
+          <div class="bar-item">
+            <div class="bar-label">Corpus tamperer
+              <div class="bar-note">Alters stored chunk text after ingestion &rarr; caught by read-hook re-hash + Merkle proof against the signed root.</div>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width: 100%"></div>
+            </div>
+            <div class="bar-pct">Caught</div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-label">Citation forger
+              <div class="bar-note">Misrepresents which sources an answer used &rarr; the attestation binds the answer to the actual chunk hashes placed in context.</div>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width: 100%"></div>
+            </div>
+            <div class="bar-pct">Caught</div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-label">Answer tamperer
+              <div class="bar-note">Modifies the answer after generation &rarr; caught by the signed answer_sha256 inside the attestation.</div>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width: 100%"></div>
+            </div>
+            <div class="bar-pct">Caught</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: Detail -> What it doesn't claim -->
+    <div class="slide layout-detail">
+      <div class="slide-header">
+        <h4>Threat Model</h4>
+        <span class="tag">What It Doesn't Claim</span>
+      </div>
+      <div class="slide-content">
+        <h2>It proves the provenance of an answer, not its truth — stating that boundary is deliberate</h2>
+        <div class="detail-body">
+          <div class="detail-col">
+            <div class="detail-col-label">Trust boundaries</div>
+            <div class="detail-block">
+              <h3>Malicious or negligent publisher</h3>
+              <p>A publisher can sign false content. The signature makes them accountable — non-repudiable — but doesn't adjudicate truth. Provenance &ne; correctness.</p>
+            </div>
+            <div class="detail-block">
+              <h3>Key compromise, rotation, revocation</h3>
+              <p>Theft of either private key breaks its guarantee. A rotated key invalidates prior attestations with no transparency log to reconcile them yet.</p>
+            </div>
+            <div class="detail-block">
+              <h3>Freshness / rollback</h3>
+              <p>Each ingestion is an independently signed snapshot. An older, authentically signed snapshot could still be replayed — no TUF-style monotonic timestamp yet.</p>
+            </div>
+          </div>
+          <div class="detail-col">
+            <div class="detail-col-label">Explicit non-goals</div>
+            <div class="detail-block">
+              <h3>Retrieval-selection attacks</h3>
+              <p>An adversary who influences the query or embedding space can surface authentic but misleading chunks. Integrity doesn't imply honest selection.</p>
+            </div>
+            <div class="detail-block">
+              <h3>Prompt injection</h3>
+              <p>Instructions smuggled through retrieved content can subvert the answer while every integrity check still passes. A separate problem, deliberately out of scope here.</p>
+            </div>
+            <div class="detail-block">
+              <h3>Confidentiality &amp; availability</h3>
+              <p>No protection of source secrecy, no resistance to denial of service. The asset protected is integrity of the chain, not secrecy or uptime.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: Detail -> Applications & vulnerabilities stopped -->
+    <div class="slide layout-detail">
+      <div class="slide-header">
+        <h4>Real-World Stakes</h4>
+        <span class="tag">Applications</span>
+      </div>
+      <div class="slide-content">
+        <h2>Where this pattern matters, and what it actually stops</h2>
+        <div class="detail-body">
+          <div class="detail-col">
+            <div class="detail-col-label">Applications</div>
+            <div class="detail-block">
+              <h3>Regulated research &amp; compliance</h3>
+              <p>Legal, financial, and medical domains where an AI-generated answer must be auditable after the fact — provably traceable to a specific, unaltered source, not just plausible-sounding.</p>
+            </div>
+            <div class="detail-block">
+              <h3>Enterprise knowledge bases</h3>
+              <p>Internal wikis, incident postmortems, and policy Q&amp;A, where accountability for what the system told an employee matters as much as the answer itself.</p>
+            </div>
+            <div class="detail-block">
+              <h3>Scientific literature assistants</h3>
+              <p>This demo's own domain: research tools over papers, where an answer must prove it traces to real, unaltered papers — not a hallucinated citation.</p>
+            </div>
+          </div>
+          <div class="detail-col">
+            <div class="detail-col-label">Vulnerabilities Stopped</div>
+            <div class="detail-block">
+              <h3>Data poisoning / silent corpus tampering</h3>
+              <p>Editing or swapping indexed content after the fact to manipulate future answers — caught by the read-hook hash + Merkle proof + root signature check.</p>
+            </div>
+            <div class="detail-block">
+              <h3>Citation fabrication</h3>
+              <p>An answer claims support from a source it never actually used — caught because the attestation binds the answer to the exact chunk hashes placed in context.</p>
+            </div>
+            <div class="detail-block">
+              <h3>Post-hoc output tampering</h3>
+              <p>An answer altered after generation — in a log, a cache, a compliance record — to misrepresent what the system actually said. Caught by the signed answer_sha256.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 10: Closing -->
+    <div class="slide layout-closing">
+      <div class="closing-decoration"></div>
+      <div class="closing-decoration-2"></div>
+      <div class="accent-line" style="margin: 0 auto 1.5rem;"></div>
+      <h1>Signed at the Source,<br>Signed at the Answer</h1>
+      <p class="closing-sub">Independently checkable end to end &mdash; ask a question, tamper a source, watch the citation flip, verify it from a separate process holding only the public keys.</p>
+      <a href="https://github.com/Shounak-Ghosh/provenance-aware-rag" target="_blank" rel="noreferrer" class="cta-btn">Live Demo &rarr;</a>
+      <p class="closing-contact">github.com/Shounak-Ghosh/provenance-aware-rag</p>
+    </div>
+
+  </div>
+
+  <!-- Navigation -->
+  <div class="slide-counter"><span id="current">1</span> / <span id="total">10</span></div>
+  <div class="keyboard-hint">Use arrow keys to navigate</div>
+  <div class="progress-bar" id="progress"></div>
+  <div class="nav-controls">
+    <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)" aria-label="Previous slide">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+    <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)" aria-label="Next slide">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </button>
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const currentEl = document.getElementById('current');
+    const totalEl = document.getElementById('total');
+    const progressEl = document.getElementById('progress');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    let current = 0;
+    const total = slides.length;
+    totalEl.textContent = total;
+
+    function updateSlide() {
+      slides.forEach((slide, i) => {
+        slide.classList.remove('active', 'prev');
+        if (i === current) {
+          slide.classList.add('active');
+        } else if (i < current) {
+          slide.classList.add('prev');
+        }
+      });
+      currentEl.textContent = current + 1;
+      progressEl.style.width = ((current + 1) / total * 100) + '%';
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === total - 1;
+    }
+
+    function changeSlide(dir) {
+      const next = current + dir;
+      if (next >= 0 && next < total) {
+        current = next;
+        updateSlide();
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        changeSlide(1);
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        changeSlide(-1);
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        current = 0;
+        updateSlide();
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        current = total - 1;
+        updateSlide();
+      }
+    });
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    document.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const diff = touchStartX - touchEndX;
+      if (Math.abs(diff) > 50) {
+        changeSlide(diff > 0 ? 1 : -1);
+      }
+    }, { passive: true });
+
+    updateSlide();
+  </script>
+
+</body>
+</html>
