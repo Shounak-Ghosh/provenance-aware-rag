@@ -23,6 +23,15 @@ SERVICE_VERIFY_KEY_PATH    = KEYS_DIR / "service.vk"
 ROOTS_PATH           = Path("data/roots.json")
 ATTESTATION_LOG_PATH = Path("data/attestation_log.jsonl")
 
+# ── OKF bundle config (Day 1 — parse/canonicalize/ingest, see src/okf.py) ────
+OKF_COLLECTION_NAME = "okf_concepts"        # separate Chroma collection; same CHROMA_PATH
+OKF_ROOTS_PATH       = Path("data/okf_roots.json")
+OKF_BUNDLES_DIR      = Path("bundles")
+OKF_CANON_VERSION    = "okf-concept/v1"     # domain separation + canonicalization version tag
+OKF_PINS_VERSION     = "okf-pins/v1"
+
+ACTOR_KEYS_DIR = KEYS_DIR / "actors"        # per-actor keyring (Phase 3, not this pass)
+
 SYSTEM_PROMPT = (
     "You are a precise research assistant. "
     "Prefer the provided context when it is relevant. "

@@ -1,0 +1,10 @@
+{
+  "acme_retail": {
+    "repo": "https://github.com/GoogleCloudPlatform/knowledge-catalog",
+    "path": "okf/bundles/acme_retail",
+    "commit": "3fcbb9f828c2f23d109c855ee403c3a4c81f3a96",
+    "fetched_at": "2026-08-02",
+    "license": "see upstream LICENSE",
+    "note": "Vendored verbatim via a sparse shallow clone. scripts/tamper_okf.py (Phase 7) mutates these files in place for the attack demos; restore the pristine bundle with `git checkout -- bundles/acme_retail`."
+  }
+}

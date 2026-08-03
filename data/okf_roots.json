@@ -1,0 +1,78 @@
+{
+  "acme_retail": {
+    "bundle": {
+      "bundle_id": "acme_retail",
+      "merkle_root": "3353892637c89866c45b6c412100593fd8879976af5eece6ed11b9fed88f6252",
+      "root_signature": "tf/mfyqNc94Ob2MdFC6yCO0CbV9jNIv8yJgK65Pn5r+RQ1f3Q4j4G9W/yCdql8iOqcXFKOuGVr7u2GAzaWg6DQ==",
+      "publisher_key_id": "publisher_v1",
+      "signed_at": "2026-08-02T20:17:40.880143+00:00"
+    },
+    "bundle_path": "bundles/acme_retail",
+    "canonicalization": "okf-concept/v1",
+    "concept_count": 9,
+    "concepts": [
+      {
+        "concept_id": "computations/gross-margin-period",
+        "sha256": "eebd3308a9d1e0c36c314fac641bbca2d47e119c5081708b9b419e0bcb2d63f6",
+        "merkle_index": 0
+      },
+      {
+        "concept_id": "computations/revenue-ytd",
+        "sha256": "fde448da13caee427f518c4239b02967b9d51c104dca9f2cc6f71782bd20ed75",
+        "merkle_index": 1
+      },
+      {
+        "concept_id": "metrics/gross-margin",
+        "sha256": "60be6f18fa2ca1ec3efa6c8bfbf8b028d80d2d2bde6067ca45c2ab6de88d4715",
+        "merkle_index": 2
+      },
+      {
+        "concept_id": "metrics/gross-margin-legacy",
+        "sha256": "ad3f5e1a3d880b3043d91f17c204b06f2b8132641963f499d426ea3ec148f330",
+        "merkle_index": 3
+      },
+      {
+        "concept_id": "metrics/revenue",
+        "sha256": "37ac14c715b1e2415a3b3a8001e86584d17e3192a8459122342ba00cd39f9c0b",
+        "merkle_index": 4
+      },
+      {
+        "concept_id": "policies/margin-standard",
+        "sha256": "245d496a9b66587758a61525dbf218f82e7f7f138485e1ba159f4557e5ad0de5",
+        "merkle_index": 5
+      },
+      {
+        "concept_id": "policies/revenue-recognition",
+        "sha256": "bfd85cc021e646bb11d3acd01b43f67b4c2cce2b60a4610bc32b307751f89f83",
+        "merkle_index": 6
+      },
+      {
+        "concept_id": "skills/run-on-bq",
+        "sha256": "8d40a9ebf0cf41984973219604539499548f75c058c2ed86c163e992d069d978",
+        "merkle_index": 7
+      },
+      {
+        "concept_id": "tables/orders",
+        "sha256": "b44012ff59cf8b9fe1e40369247c8fbfbb6ef042efb1c1cd66c5a58481bb1c9b",
+        "merkle_index": 8
+      }
+    ],
+    "trust_signatures": [],
+    "computation_pins": [
+      {
+        "concept_id": "computations/gross-margin-period",
+        "computation_sha256": "d1f76cb93bcf69dc87ee721b91ef8d1478df7a4b0aa9ec86ef1abda9e56934bd",
+        "attester_sha256": "79477f129616163080b57fcf0f6824912403e2426aee68cad47fd9cdd0fc9b9b",
+        "attester_resource": "attesters/sql_equality.py",
+        "pins_signature": "9BXZZmQhefFoC2cJeycxFf0LhkdK7hcVjNkUrNNXTHTxR4qeL4rqNgYCBCTVuyht3mh/gnEeeOoYY6XeHhr2AQ=="
+      },
+      {
+        "concept_id": "computations/revenue-ytd",
+        "computation_sha256": "d1bffc80e9708d2791a8c720f628e024ccbc37994331ef6dad893f7884c5add1",
+        "attester_sha256": "79477f129616163080b57fcf0f6824912403e2426aee68cad47fd9cdd0fc9b9b",
+        "attester_resource": "attesters/sql_equality.py",
+        "pins_signature": "PvBqGEibUGwx2rm0eiAbw9lZRnE3+xPeI71wUHn+ha6vCvVcCEVEAhde3MPIa6qUhuijg9Ke4xCpV1idrZ3TAA=="
+      }
+    ]
+  }
+}

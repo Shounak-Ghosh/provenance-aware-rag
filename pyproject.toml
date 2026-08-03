@@ -11,9 +11,15 @@ dependencies = [
     "openai>=2.44.0",
     "pynacl>=1.6.2",
     "python-dotenv>=1.2.2",
+    "pyyaml>=6.0.2",
     "sentence-transformers>=3.0.0",
     "streamlit>=1.58.0",
     "torchvision>=0.27.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
 ]
 
 [project.optional-dependencies]
@@ -28,3 +34,6 @@ intoto = [
     "in-toto-attestation>=0.9.3",
     "securesystemslib[crypto]>=1.4.0",
 ]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

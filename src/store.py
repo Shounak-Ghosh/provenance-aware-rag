@@ -5,15 +5,20 @@ import chromadb
 from src.config import CHROMA_PATH, COLLECTION_NAME
 
 
-def get_collection() -> chromadb.Collection:
-    """Return the persistent Chroma collection, creating it if it does not exist.
+def get_collection(name: str = COLLECTION_NAME) -> chromadb.Collection:
+    """Return a persistent Chroma collection, creating it if it does not exist.
+
+    `name` defaults to the arXiv collection so every existing zero-arg caller
+    is unchanged. OKF concepts live in a separate collection
+    (config.OKF_COLLECTION_NAME) in the same Chroma store, so nothing
+    cross-contaminates with the arXiv chunks.
 
     The returned Collection holds an internal reference to its client, so the
     local ``client`` variable going out of scope here is safe.
     """
     client = chromadb.PersistentClient(path=CHROMA_PATH)
     return client.get_or_create_collection(
-        name=COLLECTION_NAME,
+        name=name,
         metadata={"hnsw:space": "cosine"},
     )
 
