@@ -35,8 +35,8 @@ def corrupt_chunk(
     The original embedding is passed back unchanged on update — otherwise
     Chroma would silently re-embed the new text with its own default
     embedding function (not the pinned bge-small model), drifting the chunk
-    out of similarity rankings. Embeddings are outside the trust boundary
-    (see SPRINT.md); only the stored text and hash are meant to move here.
+    out of similarity rankings. Embeddings are outside the trust boundary;
+    only the stored text and hash are meant to move here.
     """
     result = collection.get(ids=[chunk_id], include=["metadatas", "embeddings"])
     if not result["ids"]:
