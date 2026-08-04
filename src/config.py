@@ -30,7 +30,12 @@ OKF_BUNDLES_DIR      = Path("bundles")
 OKF_CANON_VERSION    = "okf-concept/v1"     # domain separation + canonicalization version tag
 OKF_PINS_VERSION     = "okf-pins/v1"
 
-ACTOR_KEYS_DIR = KEYS_DIR / "actors"        # per-actor keyring (Phase 3, not this pass)
+ACTOR_KEYS_DIR = KEYS_DIR / "actors"        # per-actor keyring
+
+# ── Per-actor trust signatures (Day 2 — see src/trust.py) ────────────────────
+OKF_TRUST_VERSION   = "okf-trust/v1"
+OKF_KEYRING_VERSION = "okf-keyring/v1"
+ACTOR_KEYRING_PATH  = ACTOR_KEYS_DIR / "keyring.json"
 
 SYSTEM_PROMPT = (
     "You are a precise research assistant. "

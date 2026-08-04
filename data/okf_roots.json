@@ -57,7 +57,144 @@
         "merkle_index": 8
       }
     ],
-    "trust_signatures": [],
+    "trust_signatures": [
+      {
+        "bundle_id": "acme_retail",
+        "concept_id": "computations/gross-margin-period",
+        "actor": "human:jsmith@acme",
+        "at": "2026-07-01T09:00:00Z",
+        "kind": "verified",
+        "signature": "JFjH3V3qwFv3Kfp6JlmV9Hpp3qODmjW41Wz486xQJqrs7OxBOXqtObRjipI8Inugb3v3LjUDqNZWJ5HDNEy1Bw=="
+      },
+      {
+        "bundle_id": "acme_retail",
+        "concept_id": "computations/gross-margin-period",
+        "actor": "reference_agent/gemini-2.5-pro",
+        "at": "2026-06-30T14:00:00Z",
+        "kind": "generated",
+        "signature": "Eff3lOME2Or/muGSuhDPnl+8e3l/KcsAmOslY6ZPOAibPR/aXrlLW8gm7kp+EsJzEFwOxwMiaW8Isz8tkOiSBg=="
+      },
+      {
+        "bundle_id": "acme_retail",
+        "concept_id": "computations/revenue-ytd",
+        "actor": "human:jsmith@acme",
+        "at": "2026-07-01T09:00:00Z",
+        "kind": "verified",
+        "signature": "qUspCveKiixWS2PRhLPy3xxUqGNQw/h94aDIzCCOMcb0sWmDxib0ZjMZbwenVB553Oe4k/b4GSE8joULggfXDA=="
+      },
+      {
+        "bundle_id": "acme_retail",
+        "concept_id": "computations/revenue-ytd",
+        "actor": "reference_agent/gemini-2.5-pro",
+        "at": "2026-06-30T14:00:00Z",
+        "kind": "generated",
+        "signature": "bQLGMIWLHG6SnTEIgc9PoO7by6Z3qwjfX9C1kmaubSnkoaxSUF0Dn5NOAFXe+1tgC5bcrIuY6MyHPqyNVpJOAA=="
+      },
+      {
+        "bundle_id": "acme_retail",
+        "concept_id": "metrics/gross-margin",
+        "actor": "human:jsmith@acme",
+        "at": "2026-07-01T09:00:00Z",
+        "kind": "verified",
+        "signature": "d+GBhGef+ZYmdCUE9FnlL0G5GoTUQjXvjHwZD7FiQYo6rdcd0q5U6YM0O0enOYo3S6th00xvUuqgxl+HBnyoDg=="
+      },
+      {
+        "bundle_id": "acme_retail",
+        "concept_id": "metrics/gross-margin",
+        "actor": "reference_agent/gemini-2.5-pro",
+        "at": "2026-06-30T14:00:00Z",
+        "kind": "generated",
+        "signature": "sofDyyuUAgxIzdE2yLwQDTc7AE15P55VCtJRgTu8R2D7n11uHLSn/gWBAb8JmEKnXGlj33Fpuk+c9mEfV3+gCQ=="
+      },
+      {
+        "bundle_id": "acme_retail",
+        "concept_id": "metrics/gross-margin-legacy",
+        "actor": "human:jsmith@acme",
+        "at": "2024-01-15T10:00:00Z",
+        "kind": "verified",
+        "signature": "s6mS2FJdVcosduNNyiEAaoUn352shvsljVWlCtOmWH9Tjg0lCS8KPmqv9V2xBoL2zXZ5cxycnLE/H/zDLnsPAg=="
+      },
+      {
+        "bundle_id": "acme_retail",
+        "concept_id": "metrics/gross-margin-legacy",
+        "actor": "human:jsmith@acme",
+        "at": "2024-01-15T10:00:00Z",
+        "kind": "generated",
+        "signature": "eZD5e1z4m34uVBdOBfaYQykhVE5Mn3A+2Q9Y4xbBpDiiEiPAMpEZ6g7Y0yNBAG3dZRDISnGmkjPoss4s3EEjCw=="
+      },
+      {
+        "bundle_id": "acme_retail",
+        "concept_id": "metrics/revenue",
+        "actor": "human:jsmith@acme",
+        "at": "2026-07-01T09:00:00Z",
+        "kind": "verified",
+        "signature": "zHIAfo6NM3XabYkXrIGOixoLcaDFHfOuPcYTp5IFjazmqLfVYwrymsRNliaHboUcyK2r8Wfb4Pa+vbzefF+UBg=="
+      },
+      {
+        "bundle_id": "acme_retail",
+        "concept_id": "metrics/revenue",
+        "actor": "reference_agent/gemini-2.5-pro",
+        "at": "2026-06-30T14:00:00Z",
+        "kind": "generated",
+        "signature": "H/K/pYyW5nlve/oy0ICeH8vvyhZ66MWPqM3OXWIuWdWmQirzcuw9i65XjS5Pdt4D3bKbudqwbU1VehUsbtFXAA=="
+      },
+      {
+        "bundle_id": "acme_retail",
+        "concept_id": "policies/margin-standard",
+        "actor": "human:jsmith@acme",
+        "at": "2026-06-15T09:00:00Z",
+        "kind": "verified",
+        "signature": "0l9d6OKfTgCh9QBdSbnd+hVXaPTJcS0WSgm6geFjg4biMJYKh9fcPrAsz8Kxk24KNB61YOZ/4t1nkUQGBeX/DA=="
+      },
+      {
+        "bundle_id": "acme_retail",
+        "concept_id": "policies/margin-standard",
+        "actor": "human:jsmith@acme",
+        "at": "2026-02-01T10:00:00Z",
+        "kind": "generated",
+        "signature": "5VOzuGd8YWZrPSF/Qegg+w3HJILlH+CHk/tEVrGNxzsdTm7u1SzduuFOyWr3oJbWJ4gADy3OvSNJnVTubPq3BA=="
+      },
+      {
+        "bundle_id": "acme_retail",
+        "concept_id": "policies/revenue-recognition",
+        "actor": "human:jsmith@acme",
+        "at": "2026-06-15T09:00:00Z",
+        "kind": "verified",
+        "signature": "ZMkQekpnayrwf7QHdIYeybHoiPwn2K31f/6HIzzUlfAc2bcEQPfNj/wEV3uDaIfxL7+Oc9U6fJnD4YZu19BQDg=="
+      },
+      {
+        "bundle_id": "acme_retail",
+        "concept_id": "policies/revenue-recognition",
+        "actor": "human:jsmith@acme",
+        "at": "2026-01-05T10:00:00Z",
+        "kind": "generated",
+        "signature": "tPt1C/MUfIa+m2HBajYpCPXYCukHlSBgmCm3lLcM14VTsH9li7Vc64ZrtHVBvZKYHSa922YfGLVFZnOznsg5CA=="
+      },
+      {
+        "bundle_id": "acme_retail",
+        "concept_id": "skills/run-on-bq",
+        "actor": "human:kliu@acme",
+        "at": "2026-06-30T14:00:00Z",
+        "kind": "generated",
+        "signature": "VTe1y5o6KRDD86Xa7Oq/CxqBnGHqhbY1c6E/z+3HLcqbzLJ1PtgQuR+RVEY+pAIzXYiNkb4U4x82lmVjsZKwCw=="
+      },
+      {
+        "bundle_id": "acme_retail",
+        "concept_id": "tables/orders",
+        "actor": "human:kliu@acme",
+        "at": "2026-07-01T16:00:00Z",
+        "kind": "verified",
+        "signature": "6bdIC/8sLHqzDUx0GutE/hqJAhllVXEhlfct6mQntmQYuyCDzEKhiTbdLpGhKKyMLt9CaKQv+7mkBqIze5MpDg=="
+      },
+      {
+        "bundle_id": "acme_retail",
+        "concept_id": "tables/orders",
+        "actor": "reference_agent/gemini-2.5-pro",
+        "at": "2026-06-30T14:00:00Z",
+        "kind": "generated",
+        "signature": "XRJHql7YlegOHF/192mvimi1H8wsEgxG0z2GZU8nFtdjhvxeN71d4PmKuaYBxhOBdoV77UloZ4Jg5+Oz+sWYCQ=="
+      }
+    ],
     "computation_pins": [
       {
         "concept_id": "computations/gross-margin-period",

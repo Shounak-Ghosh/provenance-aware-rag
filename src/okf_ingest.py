@@ -20,21 +20,15 @@ from src.config import (
     EMBED_MODEL_NAME,
     OKF_CANON_VERSION,
     OKF_COLLECTION_NAME,
-    OKF_PINS_VERSION,
     OKF_ROOTS_PATH,
     PUBLISHER_KEY_ID,
     PUBLISHER_SIGNING_KEY_PATH,
 )
 from src.crypto import load_signing_key, sign
 from src.merkle import compute_root
-from src.okf import _as_list, attester_bytes, canonical_computation_bytes, parse_bundle
+from src.okf import _as_list, attester_bytes, canonical_computation_bytes, parse_bundle, pins_message
 from src.schema import BundleRecord, ComputationPins, ConceptRecord
 from src.store import get_collection
-
-
-def pins_message(bundle_id: str, concept_id: str, comp_sha: str, att_sha: str) -> bytes:
-    """Domain-separated, unambiguous message for a ComputationPins signature."""
-    return f"{OKF_PINS_VERSION}|{bundle_id}|{concept_id}|{comp_sha}|{att_sha}".encode()
 
 
 def build_pins(bundle_path: Path, concepts: list[ConceptRecord], bundle_id: str, publisher_sk) -> list[ComputationPins]:

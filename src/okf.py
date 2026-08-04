@@ -50,9 +50,27 @@ from typing import Any
 import yaml
 
 from src.config import OKF_CANON_VERSION as CANON_VERSION
+from src.config import OKF_PINS_VERSION
 from src.schema import ConceptRecord
 
 RESERVED_FILES = frozenset({"index.md", "log.md"})  # §3.1 navigation/history, never concepts
+
+_DELIMITERS = ("|", "\n", "\r")
+
+
+def _no_delimiters(*fields: str) -> None:
+    """Reject '|'/newline in any field of a domain-separated signed message.
+
+    Every signed message in this project ('|'-joined, version-prefixed: see
+    pins_message() here and trust.trust_message()) is unambiguous only if no
+    field can itself contain the join delimiter. Without this guard, a
+    hostile bundle could craft two different field-tuples that join to the
+    identical byte string -- fields don't need to be attacker-controlled
+    today for this to be worth closing once, in one place, for every caller.
+    """
+    for f in fields:
+        if any(d in f for d in _DELIMITERS):
+            raise ValueError(f"field contains a reserved delimiter (|, \\n, \\r): {f!r}")
 
 
 # ── frontmatter parsing ──────────────────────────────────────────────────────
@@ -362,6 +380,18 @@ def extract_computation(concept: ConceptRecord) -> tuple[str, str] | None:
     if not indented:
         return None
     return textwrap.dedent("\n".join(indented)), ""
+
+
+def pins_message(bundle_id: str, concept_id: str, comp_sha: str, att_sha: str) -> bytes:
+    """Domain-separated, unambiguous message for a ComputationPins signature.
+
+    Lives here (pure stdlib) rather than in src/okf_ingest.py so that a
+    verifier (src/okf_verify.py) can recompute it without transitively
+    importing sentence_transformers/chromadb -- consistent with verify.py's
+    public-key-only, no-heavy-deps verification path.
+    """
+    _no_delimiters(bundle_id, concept_id, comp_sha, att_sha)
+    return f"{OKF_PINS_VERSION}|{bundle_id}|{concept_id}|{comp_sha}|{att_sha}".encode()
 
 
 def canonical_computation_bytes(concept: ConceptRecord, bundle_path: Path | None = None) -> bytes | None:

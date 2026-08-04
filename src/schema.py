@@ -52,11 +52,12 @@ class BundleRecord(TypedDict):   # mirrors DocumentRecord field-for-field
 
 
 class TrustSignature(TypedDict):  # one per authenticated verified/generated entry (Phase 3)
+    bundle_id:  str
     concept_id: str
     actor:      str              # "human:jsmith@acme", "process:finance-nightly", "<producer>/<ver>"
     at:         str
     kind:       str              # "verified" | "generated"
-    signature:  str              # base64 Ed25519 over (concept_sha256|actor|at|kind), actor key
+    signature:  str              # base64 Ed25519 over trust_message(...), actor key
 
 
 class ComputationPins(TypedDict):  # signed at bundle-sign time; enables §10 hardening (Phase 5)
@@ -65,3 +66,21 @@ class ComputationPins(TypedDict):  # signed at bundle-sign time; enables §10 ha
     attester_sha256:    str      # over the raw attester resource bytes
     attester_resource:  str      # bundle-root-relative path, so verifiers can locate it
     pins_signature:     str      # base64 Ed25519 over the pins message, publisher key
+
+
+class ActorKeyRecord(TypedDict):  # one entry per actor in data/keys/actors/keyring.json
+    key_id:      str
+    verify_key:  str             # base64 32-byte Ed25519 public key
+    sk_file:     str             # filename under data/keys/actors/, gitignored
+    kind:        str             # "human" | "team" | "process" | "agent" (§7 convention)
+
+
+class TrustAssessment(TypedDict):  # per-concept output of trust.derive_authenticated_tier
+    concept_id:    str
+    claimed_tier:  str            # derived from the plaintext `verified` YAML alone (§5.3)
+    tier:          str            # derived only from SIGNATURE-BACKED verified entries
+    authenticated: list[str]      # actors whose verified entry carries a valid signature
+    unbacked:      list[str]      # claimed verified actor with no signature at all
+    unknown_actor: list[str]      # claimed actor absent from the keyring
+    invalid:       list[str]      # signature present but does not verify
+    downgraded:    bool           # tier != claimed_tier
