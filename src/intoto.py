@@ -17,6 +17,7 @@ requires it to be installed. See docs/THREAT_MODEL.md and README.md's
 """
 
 _LINK_NAME_DEFAULT = "generate-answer"
+_RUN_LINK_NAME_DEFAULT = "okf-attested-computation-run"  # mirrors src.config.OKF_RUN_PREDICATE_NAME
 _ITE6_PREDICATE_TYPE = "https://in-toto.io/attestation/link/v0.3"
 _ITE6_PAYLOAD_TYPE = "application/vnd.in-toto+json"
 
@@ -51,12 +52,9 @@ def sign_real_ite6_statement(
     """
     import json as _json
 
-    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
     from google.protobuf.json_format import MessageToDict
     from in_toto_attestation.v1.resource_descriptor import ResourceDescriptor
     from in_toto_attestation.v1.statement import Statement
-    from securesystemslib.dsse import Envelope
-    from securesystemslib.signer import CryptoSigner, SSlibKey
 
     if materials is None:
         materials = chunk_materials_from_hashes(attestation["chunk_hashes"])
@@ -84,6 +82,78 @@ def sign_real_ite6_statement(
     statement = Statement([subject.pb], _ITE6_PREDICATE_TYPE, predicate)
     statement.validate()
     payload = _json.dumps(MessageToDict(statement.pb)).encode()
+    return _sign_envelope(payload, signing_key, key_id)
+
+
+def sign_run_ite6_statement(run: dict, signing_key, key_id: str, name: str = _RUN_LINK_NAME_DEFAULT) -> dict:
+    """Build and DSSE-sign a genuine ITE-6 Statement over an Attested
+    Computation RUN (a src.schema.RunRecord, see src/okf_attest.py) --
+    same Link-predicate shape as sign_real_ite6_statement's answer
+    attestation, sharing only the envelope-signing tail (_sign_envelope).
+
+    `materials` come from what was PINNED (and publisher-signed) at
+    bundle-sign time -- src.schema.ComputationPins fields carried on `run` --
+    not from a fresh read of the bundle: the statement asserts what this run
+    was AUTHORIZED to execute, matching exactly what src.okf_attest.attest_run
+    checked before running anything. Requires the optional `intoto` extra.
+    """
+    import json as _json
+
+    from google.protobuf.json_format import MessageToDict
+    from in_toto_attestation.v1.resource_descriptor import ResourceDescriptor
+    from in_toto_attestation.v1.statement import Statement
+
+    subject = ResourceDescriptor(
+        name=f"{run['bundle_id']}/{run['concept_id']}#run", digest={"sha256": run["run_sha256"]}
+    )
+    materials_rd = [
+        MessageToDict(
+            ResourceDescriptor(
+                name=f"{run['concept_id']}#computation", digest={"sha256": run["computation_sha256"]}
+            ).pb
+        ),
+        MessageToDict(
+            ResourceDescriptor(name=run["attester_resource"], digest={"sha256": run["attester_sha256"]}).pb
+        ),
+        MessageToDict(ResourceDescriptor(name=run["concept_id"], digest={"sha256": run["concept_sha256"]}).pb),
+        MessageToDict(ResourceDescriptor(name="params", digest={"sha256": run["params_sha256"]}).pb),
+    ]
+    predicate = {
+        "name": name,
+        "command": ["okf-attest", run["bundle_id"], run["concept_id"]],
+        "materials": materials_rd,
+        "byproducts": {
+            "receipt_sha256": run["receipt_sha256"],
+            "verdict": "ok" if run["verdict_ok"] else "fail",
+            "reason": run["verdict_reason"] or "",
+        },
+        "environment": {
+            "bundle_id": run["bundle_id"],
+            "merkle_root": run["merkle_root"],
+            "runtime": run["runtime"],
+            "status": run["status"],
+            "stale_after": run["stale_after"],
+            "authenticated_tier": run["authenticated_tier"],
+            "executor_resource": run["executor_resource"],
+            "timestamp": run["timestamp"],
+            "service_key_id": run["service_key_id"],
+        },
+    }
+    statement = Statement([subject.pb], _ITE6_PREDICATE_TYPE, predicate)
+    statement.validate()
+    payload = _json.dumps(MessageToDict(statement.pb)).encode()
+    return _sign_envelope(payload, signing_key, key_id)
+
+
+def _sign_envelope(payload: bytes, signing_key, key_id: str) -> dict:
+    """DSSE-sign an already-built ITE-6 Statement payload under our raw PyNaCl
+    Ed25519 `signing_key` (a nacl.signing.SigningKey), re-keyed into a
+    securesystemslib key object -- the shared tail for sign_real_ite6_statement
+    and sign_run_ite6_statement; the only difference between the two callers
+    is how `payload` gets built."""
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+    from securesystemslib.dsse import Envelope
+    from securesystemslib.signer import CryptoSigner, SSlibKey
 
     private_key = Ed25519PrivateKey.from_private_bytes(bytes(signing_key))
     sslib_key = SSlibKey(

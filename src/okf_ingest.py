@@ -184,7 +184,7 @@ def ingest_bundle(
                 {"concept_id": c["concept_id"], "sha256": c["sha256"], "merkle_index": c["merkle_index"]}
                 for c in concepts
             ],
-            "trust_signatures": roots.get(bundle_id, {}).get("trust_signatures", []),  # Phase 3
+            "trust_signatures": roots.get(bundle_id, {}).get("trust_signatures", []),  # see src/trust.py
             "computation_pins": pins,
         }
         OKF_ROOTS_PATH.parent.mkdir(parents=True, exist_ok=True)

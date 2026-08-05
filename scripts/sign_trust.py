@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Issue per-actor trust signatures over a bundle's verified/generated entries.
 
-The production side of src/trust.py (Phase 3): for every `verified`/
+The production side of src/trust.py: for every `verified`/
 `generated` entry in a bundle's concepts, sign a claim binding (concept
 digest, actor, timestamp, kind) under that actor's own key, and write the
 result into data/okf_roots.json[bundle_id]["trust_signatures"] -- the field

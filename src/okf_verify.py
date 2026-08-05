@@ -123,12 +123,13 @@ def verify_bundle(
     roots: dict,
     publisher_vk: nacl.signing.VerifyKey,
     keyring: dict[str, nacl.signing.VerifyKey],
+    concepts: list[ConceptRecord] | None = None,
 ) -> dict:
     """Full at-rest verification report for one bundle. Library function --
     no printing; verify.py's --okf-bundle mode (a later pass) owns the
     ✅/❌ rendering.
 
-    Re-parses the bundle from disk on every call (leaf order and
+    Re-parses the bundle from disk on every call by default (leaf order and
     merkle_index are always re-derived, per check_concept_tamper's
     docstring) and builds the Merkle proof from those CURRENT leaf hashes --
     the same live-state pattern src.retrieve/src.verifier already use for
@@ -136,6 +137,12 @@ def verify_bundle(
     so a content edit anywhere in the bundle is expected to also break
     sibling concepts' proofs against the signed root, not just the edited
     concept's own hash check.
+
+    `concepts` lets a caller that has ALREADY parsed the bundle (e.g.
+    src.okf_attest.attest_run, which needs its own parse to build a run)
+    pass that same list in, so the at-rest report and the run provably
+    reason about one parse of the directory rather than two independent
+    reads of state an attacker may be writing to concurrently.
     """
     bundle_entry = roots.get(bundle_id)
     if bundle_entry is None:
@@ -146,7 +153,8 @@ def verify_bundle(
     pins_index = {p["concept_id"]: p for p in bundle_entry.get("computation_pins", [])}
     sig_index = index_trust_signatures(bundle_entry.get("trust_signatures", []))
 
-    concepts = parse_bundle(bundle_path, bundle_id)  # fresh, concept_id-sorted, live disk state
+    if concepts is None:
+        concepts = parse_bundle(bundle_path, bundle_id)  # fresh, concept_id-sorted, live disk state
     leaf_hashes = [c["sha256"] for c in concepts]
     recomputed_root = compute_root(leaf_hashes)  # REUSE merkle.compute_root
     signed_root = bundle_rec.get("merkle_root", "")

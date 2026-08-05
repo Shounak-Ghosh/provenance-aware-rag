@@ -51,7 +51,7 @@ class BundleRecord(TypedDict):   # mirrors DocumentRecord field-for-field
     signed_at:        str        # ISO-8601
 
 
-class TrustSignature(TypedDict):  # one per authenticated verified/generated entry (Phase 3)
+class TrustSignature(TypedDict):  # one per authenticated verified/generated entry (see src/trust.py)
     bundle_id:  str
     concept_id: str
     actor:      str              # "human:jsmith@acme", "process:finance-nightly", "<producer>/<ver>"
@@ -60,7 +60,7 @@ class TrustSignature(TypedDict):  # one per authenticated verified/generated ent
     signature:  str              # base64 Ed25519 over trust_message(...), actor key
 
 
-class ComputationPins(TypedDict):  # signed at bundle-sign time; enables §10 hardening (Phase 5)
+class ComputationPins(TypedDict):  # signed at bundle-sign time; enables §10 hardening (see src/okf_attest.py)
     concept_id:         str
     computation_sha256: str      # over the canonicalized `# Computation` fence or `computation:` file
     attester_sha256:    str      # over the raw attester resource bytes
@@ -84,3 +84,46 @@ class TrustAssessment(TypedDict):  # per-concept output of trust.derive_authenti
     unknown_actor: list[str]      # claimed actor absent from the keyring
     invalid:       list[str]      # signature present but does not verify
     downgraded:    bool           # tier != claimed_tier
+
+
+# ── Attestation integrity at the run ──────────────────────────────────────────
+# A "run" executes ONE Attested Computation concept under the digests that were
+# PINNED (and publisher-signed) at bundle-sign time -- see src/okf_attest.py.
+
+class RunReceipt(TypedDict):     # what an executor (e.g. skills/run-on-bq.md) returns
+    job_id:       str
+    executed_sql: str
+    result:       list
+
+
+class RunVerdict(TypedDict):     # what a concept's attester returns
+    ok:      bool
+    reason:  str | None
+    details: dict
+
+
+class RunRecord(TypedDict):      # one line of data/okf_runs.jsonl, service-key signed
+    run_version:          str    # OKF_RUN_VERSION
+    bundle_id:            str
+    concept_id:           str
+    concept_sha256:        str   # the concept's content digest at run time
+    merkle_root:           str   # bundle root this run was checked against
+    computation_sha256:    str   # from ComputationPins -- what was authorized to execute
+    attester_sha256:        str  # from ComputationPins -- what was authorized to judge
+    attester_resource:      str
+    executor_resource:      str
+    runtime:                str
+    params:                  dict
+    params_sha256:           str
+    receipt_sha256:          str
+    verdict_ok:              bool
+    verdict_reason:          str | None
+    claimed_value:            object
+    claimed_value_source:     str   # "receipt" | "caller" -- see okf_attest module docstring
+    authenticated_tier:       str   # recorded, NOT gated on -- see src/okf_attest.py's module docstring
+    status:                    str
+    stale_after:               str
+    timestamp:                  str  # ISO-8601
+    run_sha256:                  str  # hex SHA-256 of the canonical payload above
+    service_signature:           str  # base64 Ed25519 over run_sha256, service key
+    service_key_id:               str

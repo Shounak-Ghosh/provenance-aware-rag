@@ -1,6 +1,6 @@
 """Per-actor authenticated trust signatures for OKF v0.2 concepts.
 
-src/okf.py + src/okf_ingest.py (Day 1) answer one question: "is this bundle
+src/okf.py + src/okf_ingest.py answer one question: "is this bundle
 byte-identical to what the publisher signed?" They do NOT answer the question
 OKF's own trust signals claim to answer: "did `human:jsmith@acme` actually
 verify this concept?" A `verified: {by: human:jsmith@acme}` entry is plain

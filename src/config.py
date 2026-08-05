@@ -23,7 +23,7 @@ SERVICE_VERIFY_KEY_PATH    = KEYS_DIR / "service.vk"
 ROOTS_PATH           = Path("data/roots.json")
 ATTESTATION_LOG_PATH = Path("data/attestation_log.jsonl")
 
-# ── OKF bundle config (Day 1 — parse/canonicalize/ingest, see src/okf.py) ────
+# ── OKF bundle config (parse/canonicalize/ingest, see src/okf.py) ────────────
 OKF_COLLECTION_NAME = "okf_concepts"        # separate Chroma collection; same CHROMA_PATH
 OKF_ROOTS_PATH       = Path("data/okf_roots.json")
 OKF_BUNDLES_DIR      = Path("bundles")
@@ -32,10 +32,15 @@ OKF_PINS_VERSION     = "okf-pins/v1"
 
 ACTOR_KEYS_DIR = KEYS_DIR / "actors"        # per-actor keyring
 
-# ── Per-actor trust signatures (Day 2 — see src/trust.py) ────────────────────
+# ── Per-actor trust signatures (see src/trust.py) ─────────────────────────────
 OKF_TRUST_VERSION   = "okf-trust/v1"
 OKF_KEYRING_VERSION = "okf-keyring/v1"
 ACTOR_KEYRING_PATH  = ACTOR_KEYS_DIR / "keyring.json"
+
+# ── Attestation integrity at the run (see src/okf_attest.py) ─────────────────
+OKF_RUNS_PATH           = Path("data/okf_runs.jsonl")
+OKF_RUN_VERSION         = "okf-run/v1"                       # domain tag in the canonical run record
+OKF_RUN_PREDICATE_NAME  = "okf-attested-computation-run"      # ITE-6 predicate `name` for a run statement
 
 SYSTEM_PROMPT = (
     "You are a precise research assistant. "
