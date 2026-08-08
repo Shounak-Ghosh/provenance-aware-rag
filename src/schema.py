@@ -102,6 +102,30 @@ class RunVerdict(TypedDict):     # what a concept's attester returns
     details: dict
 
 
+class AdmissionDecision(TypedDict):  # per-concept output of enforce.admit_concept
+    concept_id:    str
+    admitted:      bool
+    reasons:       list[str]      # every failed check, not just the first (see src/enforce.py)
+    warnings:      list[str]      # noted but non-blocking (e.g. a stale source, unparsable stale_after)
+    checks:        dict           # check name -> {"ok": bool, "reason": str}, for ✅/❌ rendering
+    trust:         TrustAssessment
+    tier:          str            # trust["tier"], lifted for convenience
+    claimed_tier:  str            # trust["claimed_tier"] — what a signal-trusting consumer would see
+
+
+class OkfAnswerAttestation(TypedDict):  # one line of data/okf_attestation_log.jsonl
+    answer_sha256:       str
+    concept_hashes:      list[str]  # sha256 of every ADMITTED concept placed in the LLM's context
+    concept_ids:         list[str]
+    refused_concept_ids: list[str]  # signed: proves absence-by-policy, not absence-by-luck
+    query_sha256:        str
+    bundle_id:           str
+    model:               str
+    timestamp:           str
+    service_signature:   str
+    service_key_id:      str
+
+
 class RunRecord(TypedDict):      # one line of data/okf_runs.jsonl, service-key signed
     run_version:          str    # OKF_RUN_VERSION
     bundle_id:            str

@@ -42,6 +42,39 @@ OKF_RUNS_PATH           = Path("data/okf_runs.jsonl")
 OKF_RUN_VERSION         = "okf-run/v1"                       # domain tag in the canonical run record
 OKF_RUN_PREDICATE_NAME  = "okf-attested-computation-run"      # ITE-6 predicate `name` for a run statement
 
+# ── Runtime enforcement: the admission gate (see src/enforce.py) ─────────────
+# Separate from ATTESTATION_LOG_PATH on purpose: an OKF answer attestation signs
+# concept hashes that live in the `okf_concepts` collection, so verify.py's
+# --log-index mode (which resolves hashes against `arxiv_chunks`) must never see
+# one. Same separation as okf_roots.json/roots.json and okf_concepts/arxiv_chunks.
+OKF_ATTESTATION_LOG_PATH = Path("data/okf_attestation_log.jsonl")
+
+OKF_TIER_ORDER = ("unverified", "machine-confirmed", "human-reviewed")  # SPEC §5.3 ladder, ascending
+OKF_MIN_TIER   = "unverified"   # PERMISSIVE ON PURPOSE — see src/enforce.py's module docstring:
+                                # a forged/unbacked trust claim is refused regardless of this floor,
+                                # so the demo's refusals never depend on a hand-tuned policy.
+
+OKF_SYSTEM_PROMPT = (
+    "You are a careful data assistant answering from an organization's knowledge bundle. "
+    "Every concept you were given has already passed cryptographic admission checks; "
+    "concepts that failed were withheld from you entirely. "
+    "Answer ONLY from the provided concepts. If they do not address the question, say so "
+    "plainly rather than answering from general knowledge — an unsupported number is worse "
+    "than no number here. Cite the concepts you used inline as [concept_id]."
+)
+
+OKF_USER_PROMPT_TEMPLATE = """\
+Answer the question using ONLY the admitted concepts below.
+Cite each concept you rely on inline by its exact id in square brackets, e.g. [metrics/revenue].
+Never cite an id that does not appear below.
+
+Question: {question}
+
+Admitted concepts:
+{context_block}
+
+Answer:"""
+
 SYSTEM_PROMPT = (
     "You are a precise research assistant. "
     "Prefer the provided context when it is relevant. "

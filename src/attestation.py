@@ -10,6 +10,12 @@ from src.crypto import sign, verify
 from src.schema import Attestation
 
 _PAYLOAD_FIELDS = ("answer_sha256", "chunk_hashes", "query_sha256", "model", "timestamp")
+# FROZEN. verify.py and app.py re-verify every entry already in
+# data/attestation_log.jsonl against exactly this tuple, so adding a field here
+# would invalidate the whole log. A caller that signs a DIFFERENT payload shape
+# (src/enforce.py's OKF answer attestation, which also signs the refused set)
+# passes its own tuple via the `fields` parameter below; the crypto is identical
+# and only the field list moves.
 
 
 def build_attestation(question: str, answer: str, chunks: list[dict], model: str) -> dict:
@@ -28,23 +34,43 @@ def build_attestation(question: str, answer: str, chunks: list[dict], model: str
     }
 
 
-def _canonical_payload(attestation: dict) -> bytes:
-    payload = {field: attestation[field] for field in _PAYLOAD_FIELDS}
+def _canonical_payload(attestation: dict, fields: tuple[str, ...] = _PAYLOAD_FIELDS) -> bytes:
+    payload = {field: attestation[field] for field in fields}
     return json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
 
 
-def sign_attestation(attestation: dict, sk: nacl.signing.SigningKey, key_id: str) -> Attestation:
-    """Return a copy of ``attestation`` with service_signature/service_key_id set."""
-    signature = sign(sk, _canonical_payload(attestation))
+def sign_attestation(
+    attestation: dict,
+    sk: nacl.signing.SigningKey,
+    key_id: str,
+    fields: tuple[str, ...] = _PAYLOAD_FIELDS,
+) -> Attestation:
+    """Return a copy of ``attestation`` with service_signature/service_key_id set.
+
+    ``fields`` selects which keys enter the signed payload; the default
+    reproduces the frozen arXiv-answer shape byte for byte, so every existing
+    caller and every logged entry is unaffected.
+    """
+    signature = sign(sk, _canonical_payload(attestation, fields))
     return {**attestation, "service_signature": signature, "service_key_id": key_id}
 
 
-def verify_attestation(attestation: dict, vk: nacl.signing.VerifyKey) -> bool:
+def verify_attestation(
+    attestation: dict,
+    vk: nacl.signing.VerifyKey,
+    fields: tuple[str, ...] = _PAYLOAD_FIELDS,
+) -> bool:
     """Return True iff service_signature is a valid Ed25519 sig over the
-    canonical payload under the given service key."""
+    canonical payload under the given service key. ``fields`` must match what
+    the signer used; a verifier that guesses the wrong shape gets False, not a
+    silent pass."""
     if not attestation.get("service_signature"):
         return False
-    return verify(vk, _canonical_payload(attestation), attestation["service_signature"])
+    try:
+        payload = _canonical_payload(attestation, fields)
+    except KeyError:
+        return False  # entry does not even carry the fields this shape signs
+    return verify(vk, payload, attestation["service_signature"])
 
 
 def append_attestation(attestation: dict, path: Path = ATTESTATION_LOG_PATH) -> None:
