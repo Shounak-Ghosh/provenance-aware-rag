@@ -203,5 +203,11 @@ def verify_bundle(
         "pins": pin_reports,
         "added_concepts": added_concepts,
         "removed_concepts": removed_concepts,
+        # Derived, not folded into `ok`: a downgraded tier is a TRUST POLICY
+        # question (src.enforce.admit_concept always refuses it), not a bundle
+        # integrity question -- this report stays a pure at-rest integrity
+        # verdict, per this function's own docstring. Callers that want the
+        # policy view (verify.py's --okf-bundle CLI) read this list themselves.
+        "trust_downgraded": [r["concept_id"] for r in concept_reports if r["trust"]["downgraded"]],
         "ok": ok,
     }

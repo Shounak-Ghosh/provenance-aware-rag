@@ -12,6 +12,12 @@ Day 12 added --verify-ite6-statement: a genuine signature check (still
 public-key only) for the in-toto Attestation Framework (ITE-6) Statement
 produced by app.py's "Download in-toto link" button — see
 src/intoto.py::sign_real_ite6_statement.
+
+Day 5 (OKF) added three more standalone, public-key-only modes:
+--okf-bundle, --okf-run, --okf-answer — see _verify_okf_bundle /
+_verify_okf_run / _verify_okf_answer below. None of them touch the Chroma
+store or a private key; src.store.get_collection is imported lazily inside
+the arXiv branch of main() so these modes stay disk-only and fast.
 """
 import argparse
 import json
@@ -26,7 +32,6 @@ from src.config import (
     SERVICE_VERIFY_KEY_PATH,
 )
 from src.crypto import load_verify_key
-from src.store import get_collection
 from src.verifier import verify_answer_hash, verify_chunk
 
 
@@ -79,6 +84,195 @@ def _verify_ite6_statement(path_str: str, show_statement: bool) -> int:
     return 0 if ok else 1
 
 
+def _verify_okf_bundle(bundle_path_str: str) -> int:
+    """At-rest verification of an OKF bundle: signed root, per-concept
+    integrity, authenticated trust tier, and computation pins — entirely via
+    src.okf_verify.verify_bundle, rendered in this file's numbered ✅/❌ idiom.
+    """
+    from src.config import ACTOR_KEYRING_PATH, OKF_ROOTS_PATH
+    from src.okf_verify import verify_bundle
+    from src.trust import load_keyring
+
+    bundle_path = Path(bundle_path_str)
+    if not bundle_path.is_dir():
+        sys.exit(f"bundle path not found: {bundle_path}")
+    bundle_id = bundle_path.name
+
+    try:
+        publisher_vk = load_verify_key(PUBLISHER_VERIFY_KEY_PATH)
+    except FileNotFoundError as e:
+        sys.exit(f"Missing verify key: {e}. Run `uv run python scripts/generate_keys.py` first.")
+
+    if not OKF_ROOTS_PATH.exists():
+        print(
+            f"WARNING: {OKF_ROOTS_PATH} not found — every concept below will fail with "
+            f"'no signed root for bundle', which is NOT the same signal as a tampered "
+            f"concept. Run `uv run python -m src.okf_ingest {bundle_path}` first.\n"
+        )
+    roots = json.loads(OKF_ROOTS_PATH.read_text()) if OKF_ROOTS_PATH.exists() else {}
+
+    if not ACTOR_KEYRING_PATH.exists():
+        print(
+            f"WARNING: {ACTOR_KEYRING_PATH} not found — every claimed actor below will "
+            f"report 'unknown_actor', which is a key-distribution gap, NOT evidence of "
+            f"forgery. Run `uv run python scripts/sign_trust.py {bundle_path} --mint-missing` first.\n"
+        )
+    keyring = load_keyring(ACTOR_KEYRING_PATH)
+
+    report = verify_bundle(bundle_path, bundle_id, roots, publisher_vk, keyring)
+
+    print("=== OKF Bundle Verifier ===")
+    print(f"Bundle: {bundle_id}   ({report['bundle_path']})")
+
+    if report.get("error"):
+        print(f"\n❌ {report['error']}")
+        return 1
+
+    checks_passed: list[bool] = []
+
+    root_ok = report["root_matches"]
+    checks_passed.append(root_ok)
+    print(f"\n[1] Merkle root recomputation ... {'✅ MATCHES' if root_ok else '❌ MISMATCH'}  {report['recomputed_root'][:12]}…")
+
+    sig_ok = report["root_signature_valid"]
+    checks_passed.append(sig_ok)
+    print(f"[2] Bundle root signature ... {'✅ VALID' if sig_ok else '❌ INVALID'}")
+
+    set_ok = not report["added_concepts"] and not report["removed_concepts"]
+    checks_passed.append(set_ok)
+    set_reason = "no additions or removals" if set_ok else f"added={report['added_concepts']} removed={report['removed_concepts']}"
+    print(f"[3] Concept set ({len(report['concepts'])} signed / {len(report['concepts'])} on disk) ... {'✅' if set_ok else '❌'} {set_reason}")
+
+    if not root_ok:
+        print(
+            "\n    NOTE: the recomputed root differs from the signed root, so every concept's\n"
+            "    Merkle proof is checked against a root that has moved — sibling concepts\n"
+            "    report 'merkle proof failed' even though their own bytes are intact. The\n"
+            "    concept reporting 'concept canonical-hash mismatch' is the edited one."
+        )
+
+    print(f"\n[4] Per-concept integrity + authenticated trust ({len(report['concepts'])} concepts)")
+    for c in report["concepts"]:
+        checks_passed.append(not c["tampered"])
+        mark = "✅ verified" if not c["tampered"] else f"❌ {c['reason']}"
+        trust = c["trust"]
+        tier_str = trust["tier"] if trust["tier"] == trust["claimed_tier"] else f"{trust['tier']} (claimed: {trust['claimed_tier']})"
+        downgrade_mark = "  ❌ DOWNGRADED" if trust["downgraded"] else ""
+        print(f"    {c['concept_id']:<34} idx={c['merkle_index']:>2}  {mark:<38} trust: {tier_str}{downgrade_mark}")
+
+    if report["pins"]:
+        print(f"\n[5] Computation pins ({len(report['pins'])} Attested Computations)")
+        for p in report["pins"]:
+            checks_passed.append(p["ok"])
+            mark = "✅ verified" if p["ok"] else f"❌ {p['reason']}"
+            print(f"    {p['concept_id']:<40} {mark}")
+
+    trust_ok = not report["trust_downgraded"]
+    checks_passed.append(trust_ok)
+
+    overall_ok = all(checks_passed)
+    print()
+    print("RESULT: " + ("✅ PASS — bundle integrity and authenticated trust verify" if overall_ok else "❌ FAIL — see failures above"))
+    if report["ok"] and not trust_ok:
+        print(
+            "NOTE: bundle-integrity is green (verify_bundle's own `ok` is True); the FAIL "
+            "above is a TRUST POLICY refusal this CLI applies on top — a downgraded tier is "
+            "a policy question (src.enforce.admit_concept always refuses it), not a bundle "
+            "integrity defect, so verify_bundle deliberately does not fold it into its own `ok`."
+        )
+
+    return 0 if overall_ok else 1
+
+
+def _verify_okf_run(index: int) -> int:
+    """Re-verify one logged Attested-Computation run: record hash + service
+    signature, agreement with the publisher-signed computation/attester
+    pins, and (if present) the DSSE ITE-6 envelope — src.okf_attest.verify_run."""
+    from src.config import OKF_ROOTS_PATH, OKF_RUNS_PATH
+    from src.okf_attest import load_runs, verify_run
+
+    entries = load_runs(OKF_RUNS_PATH)
+    if not entries:
+        sys.exit(f"No runs found in {OKF_RUNS_PATH}")
+    try:
+        entry = entries[index]
+    except IndexError:
+        sys.exit(f"--okf-run {index} out of range (log has {len(entries)} entries)")
+
+    try:
+        service_vk = load_verify_key(SERVICE_VERIFY_KEY_PATH)
+        publisher_vk = load_verify_key(PUBLISHER_VERIFY_KEY_PATH)
+    except FileNotFoundError as e:
+        sys.exit(f"Missing verify key: {e}. Run `uv run python scripts/generate_keys.py` first.")
+
+    roots = json.loads(OKF_ROOTS_PATH.read_text()) if OKF_ROOTS_PATH.exists() else {}
+    pins_index = {p["concept_id"]: p for p in roots.get(entry.get("bundle_id", ""), {}).get("computation_pins", [])}
+    pins_rec = pins_index.get(entry.get("concept_id"))
+    if pins_rec is None:
+        print(
+            f"WARNING: no publisher-signed pin found for {entry.get('concept_id')!r} in "
+            f"{entry.get('bundle_id')!r} — pin-agreement checks below are SKIPPED, which "
+            f"is not the same as passing them.\n"
+        )
+
+    ok, reasons = verify_run(entry, service_vk, publisher_vk, pins_rec)
+
+    print("=== OKF Run Verifier ===")
+    print(f"Source: {OKF_RUNS_PATH} [entry {index}]")
+    print(f"Bundle: {entry.get('bundle_id')}   Concept: {entry.get('concept_id')}   Runtime: {entry.get('runtime')}")
+    print(f"Claimed value: {entry.get('claimed_value')}   (source: {entry.get('claimed_value_source')})")
+    print(f"Attester verdict: {'PASS' if entry.get('verdict_ok') else 'REFUSED'} — {entry.get('verdict_reason')}\n")
+
+    print(f"[1] Run record integrity + service signature ({entry.get('service_key_id')}) ... {'✅ VALID' if ok else '❌ INVALID'}")
+    for r in reasons:
+        print(f"      - {r}")
+
+    print()
+    print("RESULT: " + ("✅ PASS — run record verifies" if ok else "❌ FAIL — see failures above"))
+    return 0 if ok else 1
+
+
+def _verify_okf_answer(index: int) -> int:
+    """Re-verify one signed OKF answer attestation: the service signature
+    over the admitted concept hashes AND the SIGNED refused_concept_ids —
+    the property that proves an agent's refusal was absence-by-policy, not
+    absence-by-luck. See src.enforce.build_okf_answer_attestation."""
+    from src.config import OKF_ATTESTATION_LOG_PATH
+    from src.enforce import load_okf_answers, verify_okf_answer
+
+    entries = load_okf_answers(OKF_ATTESTATION_LOG_PATH)
+    if not entries:
+        sys.exit(f"No OKF answer attestations found in {OKF_ATTESTATION_LOG_PATH}")
+    try:
+        entry = entries[index]
+    except IndexError:
+        sys.exit(f"--okf-answer {index} out of range (log has {len(entries)} entries)")
+
+    try:
+        service_vk = load_verify_key(SERVICE_VERIFY_KEY_PATH)
+    except FileNotFoundError as e:
+        sys.exit(f"Missing verify key: {e}. Run `uv run python scripts/generate_keys.py` first.")
+
+    sig_ok = verify_okf_answer(entry, service_vk)
+
+    print("=== OKF Answer Attestation Verifier ===")
+    print(f"Source: {OKF_ATTESTATION_LOG_PATH} [entry {index}]")
+    print(f"Bundle: {entry.get('bundle_id')}   Model: {entry.get('model')}   Timestamp: {entry.get('timestamp')}")
+    print(f"Query hash:  {entry.get('query_sha256')}")
+    print(f"Answer hash: {entry.get('answer_sha256')}\n")
+
+    print(f"[1] Attestation signature ({entry.get('service_key_id')}) ... {'✅ VALID' if sig_ok else '❌ INVALID'}")
+    print(f"[2] Admitted concepts ({len(entry.get('concept_ids', []))}): {', '.join(entry.get('concept_ids', [])) or '(none)'}")
+    print(
+        f"[3] Refused concepts ({len(entry.get('refused_concept_ids', []))}, SIGNED — proves "
+        f"absence-by-policy): {', '.join(entry.get('refused_concept_ids', [])) or '(none)'}"
+    )
+
+    print()
+    print("RESULT: " + ("✅ PASS — signature valid over admitted AND refused concept ids" if sig_ok else "❌ FAIL — signature invalid"))
+    return 0 if sig_ok else 1
+
+
 def _load_attestation(args: argparse.Namespace) -> tuple[dict, str]:
     if args.attestation:
         path = Path(args.attestation)
@@ -116,13 +310,43 @@ def main() -> int:
         help="With --verify-ite6-statement: also print the decoded Statement payload "
         "(materials/products/environment) — display only, not itself a verification step.",
     )
+    parser.add_argument(
+        "--okf-bundle",
+        metavar="PATH",
+        help="At-rest verify an OKF bundle directory (e.g. bundles/acme_retail): signed "
+        "root, per-concept integrity, authenticated trust, computation pins. "
+        "Standalone — no Chroma, no private key.",
+    )
+    parser.add_argument(
+        "--okf-run",
+        type=int,
+        metavar="INDEX",
+        help="Verify entry INDEX of data/okf_runs.jsonl (e.g. -1 for latest): record hash, "
+        "service signature, pin agreement, ITE-6 envelope if present. Standalone.",
+    )
+    parser.add_argument(
+        "--okf-answer",
+        type=int,
+        metavar="INDEX",
+        help="Verify entry INDEX of data/okf_attestation_log.jsonl: signature over the "
+        "admitted concept hashes AND the signed refused_concept_ids. Standalone.",
+    )
     args = parser.parse_args()
 
     if args.verify_ite6_statement:
         return _verify_ite6_statement(args.verify_ite6_statement, args.show_statement)
 
+    if args.okf_bundle:
+        return _verify_okf_bundle(args.okf_bundle)
+
+    if args.okf_run is not None:
+        return _verify_okf_run(args.okf_run)
+
+    if args.okf_answer is not None:
+        return _verify_okf_answer(args.okf_answer)
+
     if not args.attestation and args.log_index is None:
-        parser.error("one of the arguments --attestation --log-index --verify-ite6-statement is required")
+        parser.error("one of the arguments --attestation --log-index --verify-ite6-statement --okf-bundle --okf-run --okf-answer is required")
 
     attestation, source_label = _load_attestation(args)
     answer_text = Path(args.answer_file).read_text() if args.answer_file else None
@@ -132,6 +356,8 @@ def main() -> int:
         service_vk = load_verify_key(SERVICE_VERIFY_KEY_PATH)
     except FileNotFoundError as e:
         sys.exit(f"Missing verify key: {e}. Run `uv run python scripts/generate_keys.py` first.")
+
+    from src.store import get_collection  # lazy: only the arXiv path needs Chroma
 
     collection = get_collection()
     if collection.count() == 0:
