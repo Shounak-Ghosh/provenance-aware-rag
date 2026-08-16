@@ -89,7 +89,7 @@ def _verify_okf_bundle(bundle_path_str: str) -> int:
     integrity, authenticated trust tier, and computation pins — entirely via
     src.okf_verify.verify_bundle, rendered in this file's numbered ✅/❌ idiom.
     """
-    from src.config import ACTOR_KEYRING_PATH, OKF_ROOTS_PATH
+    from src.config import ACTOR_KEYRING_PATH, OKF_CANON_VERSION, OKF_ROOTS_PATH
     from src.okf_verify import verify_bundle
     from src.trust import load_keyring
 
@@ -128,6 +128,11 @@ def _verify_okf_bundle(bundle_path_str: str) -> int:
         print(f"\n❌ {report['error']}")
         return 1
 
+    print(
+        f"Signed: {report['signed_at'] or '(unknown)'}  by {report['publisher_key_id'] or '(unknown)'}"
+        f"   canonicalization: {OKF_CANON_VERSION}"
+    )
+
     checks_passed: list[bool] = []
 
     root_ok = report["root_matches"]
@@ -136,12 +141,16 @@ def _verify_okf_bundle(bundle_path_str: str) -> int:
 
     sig_ok = report["root_signature_valid"]
     checks_passed.append(sig_ok)
-    print(f"[2] Bundle root signature ... {'✅ VALID' if sig_ok else '❌ INVALID'}")
+    key_id = report["publisher_key_id"] or "unknown key"
+    print(f"[2] Bundle root signature ({key_id}) ... {'✅ VALID' if sig_ok else '❌ INVALID'}")
 
     set_ok = not report["added_concepts"] and not report["removed_concepts"]
     checks_passed.append(set_ok)
     set_reason = "no additions or removals" if set_ok else f"added={report['added_concepts']} removed={report['removed_concepts']}"
-    print(f"[3] Concept set ({len(report['concepts'])} signed / {len(report['concepts'])} on disk) ... {'✅' if set_ok else '❌'} {set_reason}")
+    print(
+        f"[3] Concept set ({report['signed_concept_count']} signed / {report['disk_concept_count']} on disk) "
+        f"... {'✅' if set_ok else '❌'} {set_reason}"
+    )
 
     if not root_ok:
         print(

@@ -203,6 +203,15 @@ def verify_bundle(
         "pins": pin_reports,
         "added_concepts": added_concepts,
         "removed_concepts": removed_concepts,
+        # The two counts a "N signed / M on disk" row needs. They are NOT
+        # derivable from len(concepts) alone: `concepts` is the DISK set, so it
+        # already includes anything added since signing and excludes anything
+        # removed. Reporting both explicitly keeps the caller from doing that
+        # arithmetic wrong (and quietly printing "9 / 9" after a removal).
+        "signed_concept_count": len(signed_concepts),
+        "disk_concept_count": len(concept_reports),
+        "publisher_key_id": bundle_rec.get("publisher_key_id", ""),
+        "signed_at": bundle_rec.get("signed_at", ""),
         # Derived, not folded into `ok`: a downgraded tier is a TRUST POLICY
         # question (src.enforce.admit_concept always refuses it), not a bundle
         # integrity question -- this report stays a pure at-rest integrity
