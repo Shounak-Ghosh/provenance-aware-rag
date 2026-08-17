@@ -1,250 +1,241 @@
-# Provenance-Aware RAG
-A retrieval-augmented generation system where every answer carries a cryptographically verifiable citation chain linking it back to the exact source chunks used — and where any post-ingestion alteration of a source is automatically detected.
+# OKF-Verify
 
-**Demo:** Ask a question, get an answer with cited sources. Tamper a source chunk. Re-ask. The affected citation flips to a tamper alert, and a standalone verifier (run from a separate process with only the public keys) independently confirms the answer is no longer trustworthy.
+**Cryptographically enforceable trust for [OKF](https://github.com/GoogleCloudPlatform/knowledge-catalog)
+v0.2 knowledge bundles — checked at the moment an agent consumes a concept, not at rest.**
 
----
+OKF standardizes the frontmatter that makes an agent-maintained corpus trustable: who verified a
+concept, when, what it derives from, when it goes stale, and which SQL is sanctioned for a metric.
+Those signals are plain YAML. `verified: {by: human:alice}` is a string that anyone with write
+access can type, and the spec is candid about it — §5.3 calls trust tiers "advisory signals, not
+access control," and §12 lists the runtime protocol and attester integrity as work deliberately
+deferred to a future revision.
 
-## How it works
+This project builds that deferred layer on a bundle in transit between organizations. Every trust
+signal becomes a signature: per-concept digests under a publisher key, each `verified` entry under
+the key of the actor who claims it, and the sanctioned computation and its attester pinned by digest
+before either is allowed to run. An agent then verifies at the point of use — a concept that fails
+any check never reaches the model's context, and the refusal names its reason.
 
-The provenance layer wraps the standard RAG pipeline at three points without touching retrieval logic itself:
-
-```
-Corpus (arXiv abstracts, frozen to disk)
-  │
-  ▼  [write hook — ingest]
-  SHA-256 each chunk → build per-doc Merkle tree → sign root with publisher key
-  Store sha256 + merkle_index in Chroma; write signed DocumentRecord to roots.json
-  │
-  ▼  [retrieval]
-  Embed query → cosine similarity → top-N chunks
-  [read hook] Re-hash stored text → compare to recorded sha256 → verify Merkle path → verify root sig
-  │
-  ▼  [generation]
-  LLM generates answer with inline chunk citations
-  [answer hook] Bind chunk hashes + answer hash + query hash → sign with service key → attestation
-```
-
-Two keypairs keep "was the source altered?" and "was the answer forged?" independently auditable:
-
-- **Publisher key** — signs the Merkle root of each ingested document. A consumer with only the public key can verify source integrity without trusting the vector store.
-- **Service key** — signs each answer attestation. Proves a specific answer was produced from specific, verified chunks.
-
-The trust anchor (`data/roots.json`, `data/attestation_log.jsonl`, `data/keys/*.vk`) lives deliberately outside the Chroma store an attacker would tamper.
+It also demonstrates why the run needs pinning: **OKF's native attestation loop re-derives its
+verdict from the same in-bundle artifacts an adversary just edited.** See
+[docs/FINDING-attestation-integrity.md](docs/FINDING-attestation-integrity.md).
 
 ---
 
-## Architecture
+## The demo
+
+One command. It mutates the real bundle, shows what the verifier and the admission gate do about it,
+and restores itself — including from a Ctrl-C, via a trap. It refuses to start on a dirty tree.
+
+```bash
+bash scripts/demo.sh
+```
+
+| Act | What it does | What it shows |
+|---|---|---|
+| 0 | verify + gate the pristine bundle | the baseline, on both surfaces |
+| 1 | **swap the attester** | every integrity check stays green; native §10.5 attestation *accepts* the swap; the publisher-signed pin refuses it |
+| 2 | **benign round-trip** — reorder keys, re-spell a date, add CRLF | raw bytes move on disk; the canonical digest, pins, and root do not. A raw-byte signer breaks here |
+| 3 | **forge a trust tier and re-sign the root** | the adversary holds the publisher key; root recomputes and verifies; the forged actor still never signed, so it is still refused |
+| 4 | **swap the computation, skip re-ingest** | the disk and store surfaces diverge, and each is independently anchored |
+| 5 | the full loop with a model *(needs `OPENAI_API_KEY`, skipped otherwise)* | the served answer, its signed refusal set, the ITE-6 run envelope |
+
+```bash
+bash scripts/demo.sh --list          # the acts
+bash scripts/demo.sh --act 1         # just the headline
+DEMO_PAUSE=1 bash scripts/demo.sh    # pause between acts (for recording)
+```
+
+Every claim above is reproducible with no API key at all; act 5 is the only one that needs one.
+
+## What it enforces, at the point of use
+
+[`src/enforce.py`](src/enforce.py)'s `admit_concept` runs eight checks per retrieved concept. A
+refused concept never enters the LLM's context. It does not short-circuit — a concept that is
+tampered *and* trust-forged *and* stale reports all three, because naming every reason is the point.
+
+| Check | Question |
+|---|---|
+| `integrity` | do the bytes **the model reads** (the vector-store row) match the publisher-signed digest? |
+| `integrity_on_disk` | do the bytes **a run would execute** (the file on disk) match that same signed digest? |
+| `trust_authentic` | is every `verified` claim actually signed by the actor it names? |
+| `trust_floor` | does the *authenticated* tier meet the configured `--min-tier`? |
+| `status` | is the concept deprecated? |
+| `freshness` | is `today` past `stale_after`? |
+| `pins` | for an Attested Computation: are the sanctioned computation and the attester still what the publisher signed? |
+| `sources` | do this concept's bundle-local sources still verify? |
+
+Two surfaces, not one: an at-rest verifier checks the bundle *directory*, but an agent serves rows
+out of a vector store, and nothing had ever hashed those. Both are compared against the same signed
+digest, so an attacker has to compromise both to move either.
+
+The `pins` check runs **before** the executor is invoked and before the attester module is imported.
+A refusal that happens after the bundle's code runs is not a control.
+
+## What a third party can check, at rest
+
+Public keys only. No private key, no API key, no vector store.
+
+```bash
+uv run python verify.py --okf-bundle bundles/acme_retail
+```
+
+```
+[1] Merkle root recomputation ... ✅ MATCHES  3353892637c8…
+[2] Bundle root signature (publisher_v1) ... ✅ VALID
+[3] Concept set (9 signed / 9 on disk) ... ✅ no additions or removals
+[4] Per-concept integrity + authenticated trust (9 concepts)
+[5] Computation pins (2 Attested Computations)
+
+RESULT: ✅ PASS — bundle integrity and authenticated trust verify
+```
+
+Also `verify.py --okf-run -1` (re-verify a logged computation run, including its DSSE ITE-6
+envelope) and `verify.py --okf-answer -1` (re-verify an answer attestation, including the signed
+list of concepts that were *refused* — absence by policy, provable after the fact).
+
+## Canonicalization: what the digest survives
+
+OKF assumes agents constantly rewrite these documents — §5.1 uses keyed rather than positional
+footnote labels for exactly that reason. A signature over raw bytes therefore breaks on ordinary,
+legitimate edits, and a verifier that cries wolf on benign rewrites trains its operator to ignore
+it. Concepts are hashed in a canonical form (`okf-concept/v1`) instead: RFC-8785-flavored JSON for
+the frontmatter, normalized body.
+
+**Digest unchanged** (a benign agent rewrite stays verified):
+frontmatter key reordering · block ↔ flow YAML style · quoted ↔ bare ISO dates · `Z` ↔ `+00:00` ·
+CRLF/CR ↔ LF · per-line trailing whitespace · leading/trailing blank lines · NFD ↔ NFC · YAML
+comments · `yes`/`true` spellings.
+
+**Digest changes** — by design, or as an accepted v1 limit:
+reordering *list* items (`tags`, `sources`, `verified` stay order-significant) · a bare date vs. a
+datetime (distinct values, not formatting) · `1` vs `1.0` · prose reflow · changed indentation ·
+added/removed interior blank lines · `*` ↔ `-` bullets.
+
+The body rules are deliberately conservative: a `# Computation` fence can be an indented code block,
+and reindenting it would corrupt the SQL. Frontmatter — where the trust signals live — is the robust
+part.
+
+## Prior art, and what is actually new here
+
+This is not the first attempt to sign OKF, and the claim is the *conjunction*: canonicalized **and**
+per-actor **and** run-attested **and** enforced at the point of use.
+
+- **[`signed-okf`](https://github.com/dynamicfeed/signed-okf)** is the closest prior work: a
+  whole-bundle, single-issuer, raw-byte Ed25519 signature with at-rest CLI verification, built
+  against v0.1. It genuinely mitigates third-party tampering of concept files. It hashes raw bytes,
+  so it breaks on the round-trips §5.1 anticipates; it binds one issuer, so `verified: human:alice`
+  is still a string alice never signed; it does not cover the attester (not a `.md` file, so not in
+  the signed set); and it never touches the run.
+- **The `okf` CLI, `okf-enforcer`, and the Rust `okf` crate** parse, validate, and shape-check v0.2.
+  No signing, no enforcement — useful as a conformance baseline alongside this.
+- **OKF v0.2 itself** already names this territory: Goal 4 standardizes trust frontmatter
+  "without prescribing any runtime," §5.3 calls tiers advisory, and §12's *Considered and deferred*
+  list includes "the full runtime protocol" and "the attester ABI, portability, and sandboxing."
+  This work implements a layer the spec explicitly defers — an aligned contribution, not a defect
+  report.
+- The surrounding RAG-security literature (the OWASP LLM Top 10's retrieval-poisoning entries,
+  RAGShield and similar) motivates *why* the interesting boundary is the point of use rather than
+  the store.
+
+## Quickstart
+
+Python 3.12+, [uv](https://docs.astral.sh/uv/). No API key needed for anything except generating an
+answer.
+
+```bash
+uv sync && uv sync --extra intoto      # the intoto extra enables ITE-6 export/verify
+
+uv run python scripts/generate_keys.py                                  # publisher + service keys
+uv run python -m src.okf_ingest bundles/acme_retail                     # canonicalize, hash, sign, embed
+uv run python scripts/sign_trust.py bundles/acme_retail --mint-missing  # per-actor trust signatures
+```
+
+`sign_trust.py` runs *after* ingest — it needs a signed root to bind claims against. `--mint-missing`
+mints a keypair for each actor the bundle names, standing in for the real-world key distribution
+this project does not solve (see the threat model).
+
+Then verify, gate, and run:
+
+```bash
+uv run python verify.py --okf-bundle bundles/acme_retail
+
+# the admission gate, no model required
+uv run python main_okf.py "What is Acme's revenue definition?" --no-llm --today 2026-08-01
+
+# execute an Attested Computation under its publisher-signed pins
+uv run python -m src.okf_attest bundles/acme_retail computations/revenue-ytd --param year=2026
+
+# the full loop, with a model (needs OPENAI_API_KEY in .env)
+uv run python main_okf.py "What was FY2026 revenue?" \
+    --run computations/revenue-ytd --param year=2026
+uv run python verify.py --okf-run -1
+uv run python verify.py --okf-answer -1
+```
+
+Attack the bundle yourself — each attack prints a before/after digest table and the detection it
+expects, and `restore` undoes it:
+
+```bash
+uv run python scripts/tamper_okf.py swap-attester      bundles/acme_retail computations/revenue-ytd
+uv run python scripts/tamper_okf.py swap-fence         bundles/acme_retail computations/revenue-ytd
+uv run python scripts/tamper_okf.py forge-tier         bundles/acme_retail metrics/revenue human:attacker
+uv run python scripts/tamper_okf.py benign-round-trip  bundles/acme_retail computations/revenue-ytd
+uv run python scripts/tamper_okf.py status             bundles/acme_retail
+uv run python scripts/tamper_okf.py restore            bundles/acme_retail
+```
+
+A Streamlit UI renders the disk surface and the store surface side by side, with the attacks as
+buttons — the one view the CLI cannot show at once:
+
+```bash
+uv run streamlit run app_okf.py
+```
+
+Tests: `uv run pytest -q`.
+
+## The bundle
+
+[`bundles/acme_retail`](bundles/acme_retail) is vendored verbatim from the upstream OKF repository at
+commit `3fcbb9f` ([`bundles/UPSTREAM.json`](bundles/UPSTREAM.json)) — 9 concepts (`index.md` and
+`log.md` are reserved navigation files, not concepts), of which 2 are Attested Computations, both
+naming the same attester. Nothing about it was authored for this demo, which is the point: the
+attacks work on the sample bundle the spec authors ship.
+
+## Repo map
 
 ```
 src/
-  ingest.py    fetch + chunk + embed + hash + build Merkle tree → Chroma + roots.json
-  store.py     Chroma client factory
-  retrieve.py  embed query → top-N chunks (read hook: tamper detection, coming Day 8)
-  generate.py  LLM call with citation prompt; parse cited chunk IDs
-  merkle.py    build_levels(), compute_root() — hand-rolled binary Merkle tree (~35 lines)
-  crypto.py    Ed25519 sign/verify via PyNaCl
-  schema.py    TypedDicts: ChunkRecord, DocumentRecord, Attestation
-  config.py    pinned constants (chunk size, model names, key paths, trust-anchor paths)
-  attestation.py  build_attestation(), sign/verify/append/load — answer hook (Day 10)
-  verifier.py     find_chunk_by_hash(), verify_chunk(), verify_answer_hash() — standalone verifier internals (Day 11)
-  intoto.py       sign_real_ite6_statement()/verify_real_ite6_statement()/decode_ite6_payload() — genuine in-toto Attestation Framework (ITE-6) export, optional extra (Day 12)
+  okf.py          parse a bundle; canonicalize a concept to deterministic bytes
+  okf_ingest.py   hash → Merkle tree → sign root + computation pins → embed into Chroma
+  trust.py        per-actor keyring; sign a trust entry; derive the AUTHENTICATED tier
+  okf_verify.py   check_concept_tamper, check_pins, verify_bundle (the at-rest report)
+  okf_attest.py   attest_run (pin-gated) and native_attest_run (the §10.5 baseline); ITE-6 out
+  okf_exec.py     simulated executor with parameter binding — no live warehouse needed
+  okf_retrieve.py retrieval over the okf_concepts collection
+  enforce.py      admit_concept, admit_all, run_agent — the eight checks, and the refusal
 
-scripts/
-  generate_keys.py   one-time Ed25519 keygen
+  merkle.py crypto.py intoto.py attestation.py schema.py config.py    shared substrate
 
-data/
-  corpus.json          frozen arXiv corpus (36 papers; never re-fetch after first run)
-  roots.json           per-doc DocumentRecords with Merkle roots + signatures
-  attestation_log.jsonl  append-only answer attestation log (populated Day 10)
-  keys/
-    publisher.vk       publisher public key (committed — trust anchor)
-    service.vk         service public key (committed — trust anchor)
-    publisher.sk       publisher signing key (gitignored)
-    service.sk         service signing key (gitignored)
-  chroma_db/           local Chroma vector store (gitignored)
-
-app.py    Streamlit web UI
-main.py   CLI batch runner
+verify.py            standalone verifier: --okf-bundle / --okf-run / --okf-answer (public keys only)
+main_okf.py          the agent loop, CLI
+app_okf.py           Streamlit UI: both surfaces, side by side
+scripts/demo.sh      the whole argument, six acts, self-restoring
+scripts/tamper_okf.py the four attacks, plus status/restore
+scripts/sign_trust.py issue per-actor trust signatures
 ```
 
-### Data model
+The crypto substrate is shared with this repository's original track — a provenance layer over arXiv
+abstracts, with Merkle-signed chunks, answer attestations, and in-toto ITE-6 export. That system is
+documented in full in [docs/ARXIV-RAG.md](docs/ARXIV-RAG.md) and still runs (`main.py`, `app.py`,
+`verify.py --log-index -1`).
 
-**Chunk record** (stored in Chroma metadata)
-```
-chunk_id      "{doc_id}__chunk{j:03d}"
-doc_id        arXiv short ID (e.g. "2307.03172v2")
-sha256        hex SHA-256 of chunk text
-merkle_index  0-based position in the per-document Merkle tree
-```
+## Limits
 
-**Document record** (stored in `data/roots.json`)
-```
-doc_id           arXiv short ID
-merkle_root      hex SHA-256 Merkle root of all chunk hashes
-root_signature   base64 Ed25519 signature of root bytes (publisher key)
-publisher_key_id "publisher_v1"
-ingested_at      ISO-8601 timestamp
-```
-
-**Attestation** (appended to `data/attestation_log.jsonl`, Day 10)
-```
-answer_sha256      hex SHA-256 of answer text
-chunk_hashes       ordered list of sha256 for chunks placed in LLM context
-query_sha256       hex SHA-256 of query text
-model              LLM model ID
-timestamp          ISO-8601
-service_signature  base64 Ed25519 signature (service key)
-service_key_id     "service_v1"
-```
-
----
-
-## Setup
-
-### Prerequisites
-
-- Python 3.12+
-- [uv](https://docs.astral.sh/uv/) (recommended) or pip
-- OpenAI API key
-
-### Install
-
-```bash
-git clone <repo-url>
-cd provenance-aware-rag
-uv sync
-```
-
-### Configure
-
-Create a `.env` file at the project root:
-
-```
-OPENAI_API_KEY=sk-...
-# Optional: switch to gpt-4o for the demo
-# LLM_MODEL=gpt-4o
-```
-
-### Generate keypairs (one-time)
-
-```bash
-uv run python scripts/generate_keys.py
-```
-
-This writes four files to `data/keys/`. The `.vk` public-key files are committed as the trust anchor; the `.sk` private-key files are gitignored and must never be committed.
-
-### Ingest
-
-The corpus is fetched from arXiv on first run and frozen to `data/corpus.json`. On subsequent runs the frozen file is loaded — never re-fetched. Re-ingesting after the first run would invalidate all stored chunk hashes.
-
-Ingest runs automatically when you start the app or `main.py`. To force a clean re-ingest (e.g. after changing chunking config):
-
-```bash
-rm -rf data/chroma_db/
-uv run python main.py
-```
-
----
-
-## Running
-
-### Streamlit demo (recommended)
-
-```bash
-uv run streamlit run app.py
-```
-
-Opens at `http://localhost:8501`. Ask any question about recent AI/ML research; the UI shows the answer with expandable citation chips listing the source paper, author, date, and similarity score.
-
-### CLI batch runner
-
-```bash
-uv run python main.py
-```
-
-Runs a single hardcoded query and logs the retrieved chunks, LLM answer, and cited chunk IDs.
-
-### Standalone verifier
-
-Independently re-checks a signed attestation using only the two **public**
-verify keys — no private signing key, no OpenAI key. It does read the local
-Chroma store and `data/roots.json` to recover Merkle proof material, since the
-attestation itself intentionally carries only content hashes (see
-`verify.py`'s docstring for why).
-
-```bash
-# Check the most recent answer generated by the app
-uv run python verify.py --log-index -1
-
-# Check a JSON file downloaded from the UI's "Download attestation.json" button
-uv run python verify.py --attestation attestation_2026-07-05T....json
-
-# Also check the answer text itself against answer_sha256
-uv run python verify.py --log-index -1 --answer-file answer.txt
-```
-
-Exits `0` and prints ✅ on a fully verified answer; exits `1` and prints ❌
-with the specific failing check(s) the moment a source has been tampered,
-the attestation signature doesn't check out, or a cited chunk hash no longer
-exists in the store.
-
-### in-toto export
-
-Alongside the native signed attestation, the app and verifier can also
-produce a genuine **in-toto Attestation Framework (ITE-6)** Statement — a
-step toward the in-toto/TUF/gittuf line of provenance tooling this project
-is meant to bridge to, and the direct bridge to the Cappos / Secure Systems
-Lab conversation.
-
-`src/intoto.py::sign_real_ite6_statement()` / `verify_real_ite6_statement()`
-build and DSSE-sign a Statement matching the
-[in-toto attestation spec](https://github.com/in-toto/attestation/blob/main/spec/predicates/link.md)
-exactly: `{"_type": "https://in-toto.io/Statement/v1", "subject": [...],
-"predicateType": "https://in-toto.io/attestation/link/v0.3", "predicate":
-{"name", "command", "materials": [<ResourceDescriptor>, ...], "byproducts",
-"environment"}}`, using the `in-toto-attestation` package's protobuf-backed
-`Statement`/`ResourceDescriptor` classes and `securesystemslib`'s DSSE
-`Envelope` for signing — both reference implementations for their
-respective specs (ITE-6 and [DSSE](https://github.com/secure-systems-lab/dsse)).
-Confirmed working end-to-end (sign → verify → tamper → verify fails).
-
-```bash
-# In the Streamlit UI: "Download in-toto link"
-# — signed with the same service private key already used for the
-# ordinary attestation, at the same trust boundary (generation/render time).
-
-# Independently verify it, using only the service PUBLIC key:
-uv run python verify.py --verify-ite6-statement ite6_statement_....json
-```
-
-The downloaded file is a DSSE envelope — its actual Statement content sits
-base64-encoded inside a `payload` field, which isn't demo-readable as-is.
-`src/intoto.py::decode_ite6_payload()` decodes it (display only, not a
-verification step — pair with `verify_real_ite6_statement()` for that). In
-the UI, the decoded Statement is shown inline in an expander right below the
-download button; from the CLI, add `--show-statement`:
-
-```bash
-uv run python verify.py --verify-ite6-statement ite6_statement_....json --show-statement
-```
-
-Requires the optional `intoto` extra:
-
-```bash
-uv sync --extra intoto
-```
-
-If it isn't installed, the UI shows only the "Download attestation.json"
-button and a caption explaining how to enable the in-toto one.
-
-### Error handling
-
-`verify.py` and the Streamlit app fail with a clear, specific message (not a
-raw traceback) on the failure modes most likely to come up in a demo: a
-missing or malformed attestation file, a `--log-index` out of range, a
-missing signing/verify key (with a pointer to `scripts/generate_keys.py`),
-an empty or absent Chroma store, a missing `data/roots.json`, and a
-truncated/corrupt line in `data/attestation_log.jsonl` (skipped with a
-warning rather than crashing the whole log). See `docs/THREAT_MODEL.md` for
-what is *not* handled (key compromise, rotation, revocation) and why.
+Read [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md) before believing anything here. In short: this
+proves provenance, not truth. A publisher can sign false content. The pins decide *which* attester
+runs but do not sandbox it — bundle code executes in-process, and §12 defers sandboxing. Source
+closure is one level deep. There is no TUF-style snapshot role, so an old, authentically signed
+bundle still verifies. And key rotation, revocation, delegation, and thresholds are unimplemented:
+*which identities may sign which concepts* is the open problem this work is meant to motivate, not
+one it solves.
