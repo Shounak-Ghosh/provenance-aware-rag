@@ -5,13 +5,15 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from sentence_transformers import SentenceTransformer
 
+# Must run before any `src.*` import — see app.py for why.
+load_dotenv(override=True)
+
 from src.config import EMBED_MODEL_NAME
 from src.generate import generate, parse_citations
 from src.ingest import fetch_corpus, ingest
 from src.retrieve import retrieve
 from src.store import get_collection
 
-load_dotenv()
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s  %(levelname)-8s  %(message)s",

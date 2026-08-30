@@ -33,6 +33,10 @@ from pathlib import Path
 import streamlit as st
 from dotenv import load_dotenv
 
+# Must run before any `src.*` import — see app.py for why (src/config.py reads
+# env-derived settings like LLM_MODEL once, at import time).
+load_dotenv(override=True)
+
 sys.path.insert(0, str(Path(__file__).parent / "scripts"))
 
 import tamper_okf  # noqa: E402  (scripts/ is not a package; path set above)
@@ -55,8 +59,6 @@ from src.enforce import run_agent  # noqa: E402
 from src.okf import parse_bundle  # noqa: E402
 from src.okf_verify import verify_bundle  # noqa: E402
 from src.trust import load_keyring  # noqa: E402
-
-load_dotenv()
 
 st.set_page_config(page_title="OKF-Verify", page_icon="🔐", layout="wide")
 

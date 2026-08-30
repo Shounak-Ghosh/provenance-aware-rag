@@ -26,6 +26,10 @@ from datetime import date
 
 from dotenv import load_dotenv
 
+# Must run before any `src.*` import — see app.py for why (src/config.py reads
+# env-derived settings like LLM_MODEL once, at import time).
+load_dotenv(override=True)
+
 from src.config import (
     ACTOR_KEYRING_PATH,
     EMBED_MODEL_NAME,
@@ -104,7 +108,6 @@ def _print_report(result: dict) -> None:
 
 
 def main() -> int:
-    load_dotenv()
     parser = argparse.ArgumentParser(description="Query an OKF bundle through the admission gate.")
     parser.add_argument("query")
     parser.add_argument("--bundle-id", help="restrict retrieval to one bundle")

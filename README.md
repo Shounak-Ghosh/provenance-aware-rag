@@ -147,7 +147,7 @@ answer.
 uv sync && uv sync --extra intoto      # the intoto extra enables ITE-6 export/verify
 
 uv run python scripts/generate_keys.py                                  # publisher + service keys
-uv run python -m src.okf_ingest bundles/acme_retail                     # canonicalize, hash, sign, embed
+uv run python -m src.okf_ingest bundles/acme_retail                     # canonicalize, hash, sign, embed; use --force --resign if needed
 uv run python scripts/sign_trust.py bundles/acme_retail --mint-missing  # per-actor trust signatures
 ```
 

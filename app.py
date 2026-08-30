@@ -7,6 +7,12 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from sentence_transformers import SentenceTransformer
 
+# Must run before any `src.*` import: src/config.py reads LLM_MODEL (and other
+# env-derived settings) from os.environ at import time, once, and later imports
+# are served from sys.modules cache — so loading .env after src.config has
+# already been imported silently keeps the hardcoded defaults forever.
+load_dotenv(override=True)
+
 from src.attestation import append_attestation, build_attestation, sign_attestation, verify_attestation
 from src.config import (
     EMBED_MODEL_NAME,
@@ -22,8 +28,6 @@ from src.intoto import decode_ite6_payload, sign_real_ite6_statement
 from src.merkle import build_levels
 from src.retrieve import retrieve
 from src.store import corrupt_chunk, get_collection
-
-load_dotenv()
 
 # Must be the first Streamlit call in the script.
 st.set_page_config(
