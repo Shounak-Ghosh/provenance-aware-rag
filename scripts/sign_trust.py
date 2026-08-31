@@ -121,7 +121,7 @@ def _actor_key_missing(actor: str) -> bool:
     try:
         load_actor_signing_key(actor)
         return False
-    except KeyError:
+    except (KeyError, FileNotFoundError):
         return True
 
 
