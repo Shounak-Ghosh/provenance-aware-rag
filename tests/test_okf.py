@@ -32,7 +32,7 @@ from src.okf import (
 BUNDLE_PATH = Path(__file__).parent.parent / "bundles" / "acme_retail"
 REVENUE_CONCEPT = BUNDLE_PATH / "computations" / "revenue-ytd.md"
 
-EXPECTED_MERKLE_ROOT = "3353892637c89866c45b6c412100593fd8879976af5eece6ed11b9fed88f6252"
+EXPECTED_MERKLE_ROOT = "26c2500937479d69d04c5b01f09e59942fcde9e88224760f1106eef0c1170618"
 
 
 @pytest.fixture

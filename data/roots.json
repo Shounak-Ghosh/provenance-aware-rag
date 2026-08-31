@@ -250,5 +250,306 @@
     "root_signature": "Y6vuVONNWZDdfcMkn3zxrQInGeuZXT5O9Ajto6lhwFxiCDgPVjPvuKRpkxDXmClqw3ToSdrdgA4iaahe8LNEDg==",
     "publisher_key_id": "publisher_v1",
     "ingested_at": "2026-06-30T18:54:58.842529+00:00"
+  },
+  "2608.19171v1": {
+    "doc_id": "2608.19171v1",
+    "merkle_root": "6ede1090c8d9a65700556848d0c15e98ee0f9cfc3370b23f8a34bf24e11cb2ca",
+    "root_signature": "oQIUTxxVD6U/fFiCfD4EHloI5BR9vVf/CTo4xp4cPRnHRRZfVxwjAv/8Tvbu4vFANGGSmnf0aRm6s1NdGuRQCQ==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:46.446024+00:00"
+  },
+  "2608.19168v1": {
+    "doc_id": "2608.19168v1",
+    "merkle_root": "e454b9aae359ca606104a3b567812dce93c66eed13f4ae1fbe2f18b8536c8fd3",
+    "root_signature": "CjW0lYyo9lCYEMgyLzddAbykE9npB0lM30O2ouUdFvut2r7AdTh7UR8IAJSMu+cER7NAY94SVBmpO3eUHsWuDg==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:46.640876+00:00"
+  },
+  "2608.19151v1": {
+    "doc_id": "2608.19151v1",
+    "merkle_root": "4c67cdf02b0bc716aa3a779896535dd247aa98ff0dd16a0629b56730573c1186",
+    "root_signature": "Sm1j4wGI0Ar3MIcJSDxYO+zmYEgGr3sNPhuE/xSICWTrhf3+pyBEsXxvp9J9hkDW8DusZhIx9IrDSFtwkkckDQ==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:47.137633+00:00"
+  },
+  "2608.19140v1": {
+    "doc_id": "2608.19140v1",
+    "merkle_root": "3b22be8892d982179776265dd3467d271b90f84beb1a47610e17b40177e51d84",
+    "root_signature": "JxUBYEpKcbV4DRW+a+xxZO3uPjtPM5pHsaxOati7zzm2lNdJYjNZlwUNNLRVuGTQ1PAcrT6m06nEM2m8W1bKAA==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:47.296427+00:00"
+  },
+  "2608.19134v1": {
+    "doc_id": "2608.19134v1",
+    "merkle_root": "0a591c322bad95f2b02d5559bfd74609d21a5923487aa935ab8db8e2ea78bfa3",
+    "root_signature": "8D0+bmxVPs6fuCdbFIedNEtzogY3gcM4IwafFgw4CyCvNDRe+lj6QjdkUs579eysqhwiXgLi8mKOhWq//qaxBQ==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:47.668811+00:00"
+  },
+  "2608.19127v1": {
+    "doc_id": "2608.19127v1",
+    "merkle_root": "8d2bebb0759022889ec6fc5823206fc4fc501065afff215bce97c6aa82048fc4",
+    "root_signature": "2Th6BfS8mW6Aupt6DwSbRzrxg8pAGRzOXTdomGqVn+oioDGcuLeV/VRbYU7waIOfDfYeN1Oug5hy8hOifQkJCA==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:47.730059+00:00"
+  },
+  "2608.19119v1": {
+    "doc_id": "2608.19119v1",
+    "merkle_root": "ab2319afe2b8ee9fc26986126002c9506f51da0a2671379fa77234578075f682",
+    "root_signature": "/fRU7qHpZk8LtTkhsCg26pO+axdYzVhuaCUw+EdwwRk8aJIJ/s4HONTk31WFmE+z0cOnCBDevn1V6NdakN5ZDA==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:47.858128+00:00"
+  },
+  "2608.19117v1": {
+    "doc_id": "2608.19117v1",
+    "merkle_root": "fc8eb0f955107750a91585481ef516cf0f9ebabbd3af632c1996ae5d8eff073a",
+    "root_signature": "opeiJ2GQYU4hYni+K80Bcs0IesYmjO1iRDIEuA+qD4FB6XRvnYOPBAll3FG3Mh19dkLojFDJPiebHkNIHSiWCw==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:48.094286+00:00"
+  },
+  "2608.19098v1": {
+    "doc_id": "2608.19098v1",
+    "merkle_root": "d66f73e3eb831df2491e9e100920fe1930effef3870a8bad50df40d22fd68644",
+    "root_signature": "h9WOz2T1uq+DOLPnBs1VSjoEPaQ8RqdaYLtiAoovX5MTx0DXMpOeH0k0ipHiu+mq1dGMFwx9hWe1tCu1jKicAg==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:48.192211+00:00"
+  },
+  "2608.19084v1": {
+    "doc_id": "2608.19084v1",
+    "merkle_root": "775bbb5cc20d4d99bb3df781d7edde46c377489397d47baf338768768055e838",
+    "root_signature": "TEbNQeOByOR/q1SDppn2Fr8On4zLc9VJgsiEybQn2Q9AD910AArBr6TdYKz+MwutFmiV18uJf673V8+ouzikAg==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:48.255050+00:00"
+  },
+  "2608.19073v1": {
+    "doc_id": "2608.19073v1",
+    "merkle_root": "7ebadd2b683e8586b2c48b5089e5514fd230bb119904af3e1f27d451321ed6dd",
+    "root_signature": "J4xiG6ljXmcdxnM3sLGh1KwsyNDIR0k9ZYRBLzygw+yTgG6pW2RHozs3PK9Hih1lCciDLYQMjgtmHk59ZDbWAg==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:48.306503+00:00"
+  },
+  "2608.19072v1": {
+    "doc_id": "2608.19072v1",
+    "merkle_root": "25d5f8c7429f22b0ee061a92a35264bf722de74495cf69b97b0d4c3412ede4de",
+    "root_signature": "6jg37gaQrRiJKHbVUu3o/LzzpcrDax8bynFGO3SobSclockSFpQgEjAeJWNIoh80iIIN6o66nRU5AJ1h06oGDg==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:48.365542+00:00"
+  },
+  "2608.19067v1": {
+    "doc_id": "2608.19067v1",
+    "merkle_root": "a9a34f1afaede74753bdd2acf26130352d294caba6bc5dba61e6c3aa18f1fa68",
+    "root_signature": "jX8UKl3avyVATCPbLvQifUTKHmKg+Pvk9CmNEHEsxjl2c+eP7m9tQEuTQlXXgRrcl57XCgcXK5pki5AdnMNGBQ==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:48.423453+00:00"
+  },
+  "2608.19049v1": {
+    "doc_id": "2608.19049v1",
+    "merkle_root": "7be9077a20ae78a4f6478c50ff8a426ab64b9b073834bb8514bb54c8806b6b38",
+    "root_signature": "y1y40EMgi+Uagu/mAQSjWx0I8W6lcmzPcNbKrf9GOJ8T5A0CEjnTEoPOJynYaJlpsG3UxazR1S7goJSouW2WDA==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:48.478488+00:00"
+  },
+  "2608.19043v1": {
+    "doc_id": "2608.19043v1",
+    "merkle_root": "6d3dab9541e9faa0d2096f94533e6dc9de10bfebbe9529f643c6ce4e92d693fa",
+    "root_signature": "aWXVhuW1AHsxEhHQdxPoXF5SqoVAQkRdlIY4a+aXnNjRF1dJx1Jl0INxIhISTjQ+geTmKR95xNtWaw25J2o6Cw==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:48.924899+00:00"
+  },
+  "2608.19013v1": {
+    "doc_id": "2608.19013v1",
+    "merkle_root": "16e074c2fddafe26db57f4f5211005a47fe2bf914246dc4ec8815c44e9ab6e5a",
+    "root_signature": "jIxrUotjIBJ4VY6Yvs0kxT4LOOr64nVXjUbSeSX8gB0gyKOJZholKUFvPVvMFFiNf53/mcWRi8+7TlZn9+NtDg==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:48.983946+00:00"
+  },
+  "2608.18982v1": {
+    "doc_id": "2608.18982v1",
+    "merkle_root": "e27fdf4485c4cd52f96d2d5820f066d7b5906500511341d167d74980df1c6d82",
+    "root_signature": "Az3d49uU6VLZJURyhkvqCAxHNiQRMkM444alKv5t1MGVkbB5DInLPxA+yI1xQtzP6EYb58um+nrUvNiCQViMCg==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:49.040908+00:00"
+  },
+  "2608.19197v1": {
+    "doc_id": "2608.19197v1",
+    "merkle_root": "bab58d97e88832c384b29abb5d794df6e4b30af61755e926294bdbe774a3ba17",
+    "root_signature": "RlYzF0EVpGQ5PI5sxYqHqDgcF/WfsdelMECfBo6pEJlfSGx3DfULEWxCxJXUGFrmml3on/c9GSzL9JnphVXTDA==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:49.091643+00:00"
+  },
+  "2608.19181v1": {
+    "doc_id": "2608.19181v1",
+    "merkle_root": "9491acf2733a5b596fd55085e5ac6dde5d8de548cbdcbdd9eee87511d205ef5e",
+    "root_signature": "u/q5nIw5STQP/VbF2dy/Cx8I5qh96bEDnV/NuyAbbCquJ90+WcG/C11debpHepZ0Eo5cgV5MWsne702v1BtuDw==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:49.142869+00:00"
+  },
+  "2608.19165v1": {
+    "doc_id": "2608.19165v1",
+    "merkle_root": "0a79bc3757528321f2a1c849896d8e22a0218d700b04c7f89005fd745fb73df7",
+    "root_signature": "d2VAZxBcxWVKghz3w/+nWAhSJIKgClXMQF8LaicJcI3wfxwtyZjAVpMA2ozA+6du7w0ZcJYoj7S63QYPJ37UBg==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:49.201922+00:00"
+  },
+  "2608.19133v1": {
+    "doc_id": "2608.19133v1",
+    "merkle_root": "017a304bba18e308bf8d232b92cc810d6903c5c512c32c7cf600ac11813b670a",
+    "root_signature": "0+lBqUSItwuXnK8PHbpIYoCp7DFtHCOGu+wFoQtOlohDo71vdeynY8SlGEjdu0BkX4qQbTlzhRmJaEGP7EZ2Cw==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:49.234211+00:00"
+  },
+  "2608.19083v1": {
+    "doc_id": "2608.19083v1",
+    "merkle_root": "c8798477df21b348f033a1e013811048b2a363e8e4f937e54fe279b01d76c55e",
+    "root_signature": "WAXqHJ9SsZcz6PV/G3lDqF+iQYvWmZJ9Ehej2BC82HRGMzjKPRdX79XTG5vdGiANgFFT03ktMY48QGSAmtPTAA==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:49.300180+00:00"
+  },
+  "2608.19075v1": {
+    "doc_id": "2608.19075v1",
+    "merkle_root": "ba809ec5bb00d9138edfb87ca1f6e81c9ee7e1f46a8b294ab7b3cbf592c80c69",
+    "root_signature": "9UvZuH8+abpek2t2HsbgIFdI3t770wkt90bdjsUp24vqT2EiA7wH+Fd0nfbuVfAfffJrT9ukUMIZbPwHOmqCBQ==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:49.363020+00:00"
+  },
+  "2608.19029v1": {
+    "doc_id": "2608.19029v1",
+    "merkle_root": "f0c08be3c7affb10b3222abb0381718ab619a21ff9cc353df898be1ecd04d5da",
+    "root_signature": "bC9yNEknHHWW4yKnOG6RfGn0zTqZm2m9ZuZJoPEgTDWWoF9+5niWlpLoCMoRkOIiVDL9A6pbt3nGd2BoWKNZCw==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:49.481865+00:00"
+  },
+  "2608.19026v1": {
+    "doc_id": "2608.19026v1",
+    "merkle_root": "28bc5d9a111b533535026c2ffa9dbc7270d4900c1461dabcb0ed0092b9fe44bd",
+    "root_signature": "TZg7pbSmqkSGEH898reH5sfSD0IWXPs9hPKIHN1pylFsmHcuCE+0w8bfjNaIiMicGqj7AVsxz/OWLFwfDfypAA==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:49.554804+00:00"
+  },
+  "2608.19009v1": {
+    "doc_id": "2608.19009v1",
+    "merkle_root": "d8c23da75c264cff3e96ce20685da16d3ca715048356967575a22c70e26e481f",
+    "root_signature": "JrS6hwubFq+gPZIFct7UA1RU14LpAnh5YubznFEmzVRbbPOcelP4/pjDI7mnlu56PxEOhBRbRGjxQeI6GsiKBg==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:49.610663+00:00"
+  },
+  "2608.19006v1": {
+    "doc_id": "2608.19006v1",
+    "merkle_root": "207d29a7530b806a88b61f66958c393d220277073f9f446015a5497badce9692",
+    "root_signature": "ZdgXh+i5NtXz92eOqb1LNv6cek4pRTABoTPVp6RLachfK/LGgHRItySjVNcHDaLsumd70fmDFP+VOl6IAycUDg==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:49.725402+00:00"
+  },
+  "2608.19003v1": {
+    "doc_id": "2608.19003v1",
+    "merkle_root": "62f514f2101aa5bdaf46faa841902443b08a662ffd10cf79e0428c5db6a42003",
+    "root_signature": "FHnwEvxAYXEzpuUpPjInQXhry3akuOuCmYOifZ7mkMq791HFOMHY2OnEzWeMLMvW6Y/OZ8S3nNZPJRmcp6swCQ==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:49.799249+00:00"
+  },
+  "2608.18988v1": {
+    "doc_id": "2608.18988v1",
+    "merkle_root": "fbd16d9de22bbde4ea89355273e6a7a31f502e20261732081ac059510f2f5067",
+    "root_signature": "Phse6K8qjqSaS1BhoUb/gssAQ8ap9hwxFALdCNJz2zqYWWl3+0pmkij1y3PexxQH1ligZr/RdbAroWWn1wx9Ag==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:49.860863+00:00"
+  },
+  "2608.18972v1": {
+    "doc_id": "2608.18972v1",
+    "merkle_root": "5d97b556f1b4147d9323d4f6e66fe313f60ae92042d7e869844ada0f774dcddb",
+    "root_signature": "l0yRj4cu3qxZX7nIOszDk10ookfMgFy/zF7qaWq1ItGmel7ycK8l/1vfVw9mwLK8JWa8vY01AzxGD2kyYgRhAg==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:49.927579+00:00"
+  },
+  "2608.18952v1": {
+    "doc_id": "2608.18952v1",
+    "merkle_root": "4b95cedc86ac6ef478f1b08765875721073ddda2faad7a145af0194c2e061906",
+    "root_signature": "ORDpg2Du2al4mrysZ7ovuKvMOzB8B6qfuBBcZ8IODI7gvDG+dJASVPlqNVqjb08poYM0+ZSH+OgLaU6jJiFICA==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:49.989878+00:00"
+  },
+  "2608.18940v1": {
+    "doc_id": "2608.18940v1",
+    "merkle_root": "d5dceec5e64f548d3f454ac543755a37a9143fdc071b3a7f0b04fe820d3026ad",
+    "root_signature": "r7/KQ0WT8QdqVNybq/suVVtHNnXLcK1RbQecwzC4/JnntahFBmOUUZ3Ub9cY5tNpRKMb+RgcpNgxPQSi1KUqAA==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:50.037784+00:00"
+  },
+  "2608.19182v1": {
+    "doc_id": "2608.19182v1",
+    "merkle_root": "602e48806cca7078a21c745563e52ea12abc212d68c0791c2a0d8b64af075fd7",
+    "root_signature": "wmowD9ADb9q8c0G7KP6OBOSSMqFpYMkfOE0pvjwVJTIV+seXVPVOqUi/x4dwQ3cNn84eb6M8rOmpXnV+SgDKBw==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:50.104671+00:00"
+  },
+  "2608.19174v1": {
+    "doc_id": "2608.19174v1",
+    "merkle_root": "2a72511aa40510317fba424286c976a0e07274fdd60ee32823cd98ab7d537ab7",
+    "root_signature": "1SIqNBakqec0LcWHQiH8aDfzVgX8bJHhuClsxxgP+C/N3fQkiyC+GW2y1GLh2HL19N7r1UbtmkmIXQdghIE3Ag==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:50.798226+00:00"
+  },
+  "2608.19161v1": {
+    "doc_id": "2608.19161v1",
+    "merkle_root": "7e516f1aa18ba447d33e675d8d83c4e65382611ea3a2c90c14660027cddfaa48",
+    "root_signature": "ceMAsno81SNvx63izi0t5RkFgWgimcNTlXr27qngyCJCFeEP4B25LvtzdS5oMJ9R/SrHgTSv9Zugg3tkE68dBg==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:50.883480+00:00"
+  },
+  "2608.19147v1": {
+    "doc_id": "2608.19147v1",
+    "merkle_root": "7edd796c0727bf276cbcbaf8eef48b6d1d4f5f25af8f93856b533d90a130c12b",
+    "root_signature": "ysPzNzaWznfEaduzCUejeHeGAKO0BquwRRnlEA2UfvC5fQGX64of6ukFBRRogyLY1BWgRtUSAwjCed8qc4szCA==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:50.941832+00:00"
+  },
+  "2608.19125v1": {
+    "doc_id": "2608.19125v1",
+    "merkle_root": "1beed1c0e1206ccadb23311540e11078bded2d5b2b6c629e5a4a5c408bc48106",
+    "root_signature": "dVUS1De8OP7gCwyK/prUyMDGTX1xwGBzrBsUuzG8qcbHIlg1kVwiPbv0ZupdrbgjLagBWVHLHJdNRtUyJIhuBA==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:50.999476+00:00"
+  },
+  "2608.19121v1": {
+    "doc_id": "2608.19121v1",
+    "merkle_root": "baf83f8ef869d2dae8229cc54ad1d23dea6bbd14184ed3cb84fd061667346bbf",
+    "root_signature": "qpC8cmKZpJbVaOH/URT7Xp66wBOThiyBlRKt+aQpNZpE0omIU4sTy1k8nau1Agi90lQA4n/XU48fhP97qdARCA==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:51.068207+00:00"
+  },
+  "2608.19047v1": {
+    "doc_id": "2608.19047v1",
+    "merkle_root": "1b85645647a88b78aa7dbcae18594b14389ec025aa52d10eab6edb0ca6f543a7",
+    "root_signature": "dlX1xr7GxWeAEvwxaATYGFG68ulwUt3TDrKwHyDJu/0kq1fU/SkbVMHrQNpagXmSQuTfD9yeLNpRN2+zEpXZBA==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:51.118126+00:00"
+  },
+  "2608.19032v1": {
+    "doc_id": "2608.19032v1",
+    "merkle_root": "d02e00a2ea08e81bbfdfaf01b27c7c71d144c8822044f3070906751a9ee116ff",
+    "root_signature": "mSXxjgAne4HSLEN4S2QJnjWZf9RJ8LY3EiIbFgR+EY0ZlgJQVRkx8KVu12Uncgl4vKF/4kO6pXe/QYmvMi8KDA==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:51.153919+00:00"
+  },
+  "2608.19025v1": {
+    "doc_id": "2608.19025v1",
+    "merkle_root": "21940a5836008df328e9892e560b7818c43a0e19d4276f3116ad18d9728c2f4b",
+    "root_signature": "wT3IiELGWdj5otjLsMr3FyHA09tsjPMNV6pPsbpD0KnQJQZUuAHltmcwQjuxAwVFemtmT7kYYNOnhKK9qgwbAA==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:51.221499+00:00"
+  },
+  "2608.19014v1": {
+    "doc_id": "2608.19014v1",
+    "merkle_root": "6c3a4278404280e689543847b92ae7b33802f02476e8c3c0f1c7abc83a39e85e",
+    "root_signature": "3I9ldciJio2WNhfAsiWyPkF0HAPqDWME1uXFvRoHn0pnvgD+G0uZ9jJTq7+ft3L7XXKbqSz0rk7vg4SrZkrBCQ==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:51.305314+00:00"
+  },
+  "2608.19011v1": {
+    "doc_id": "2608.19011v1",
+    "merkle_root": "671f4d73e173f80975331dfc67d78cb55391cb70e3b0c8c821db0014c1829bff",
+    "root_signature": "V9qNpTd7GjfgAOY11l0xyfDyHCKtRF3PCrj6nL+xOeWfBq4nhKznbHY67ptlBA0YxsudYWMhc+FhCG0zMUq9DQ==",
+    "publisher_key_id": "publisher_v1",
+    "ingested_at": "2026-08-20T20:35:51.389208+00:00"
   }
 }

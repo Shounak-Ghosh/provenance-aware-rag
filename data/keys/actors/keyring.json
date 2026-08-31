@@ -4,19 +4,19 @@
       "key_id": "human_jsmith_acme-f15ca5aa",
       "kind": "human",
       "sk_file": "human_jsmith_acme-f15ca5aa.sk",
-      "verify_key": "R29t3+IBgPv2uP19Q6PnZ1tGAHdtbcjOqh5SokrVLFA="
+      "verify_key": "9FgLSYdY+cZTMUjQ1y7mXcKmHmLyaw3VU0EMdOiFsEE="
     },
     "human:kliu@acme": {
       "key_id": "human_kliu_acme-3bcac850",
       "kind": "human",
       "sk_file": "human_kliu_acme-3bcac850.sk",
-      "verify_key": "qKaUAPsTry/wM+mLZLsmqYnP2PIH8syChSeWMcpBIvs="
+      "verify_key": "2H2Dcko/gPl+6wV1hlt45mvQThyQrLKiRyCqDPZ0nA0="
     },
     "reference_agent/gemini-2.5-pro": {
       "key_id": "reference_agent_gemini-2.5-pro-180e514b",
       "kind": "agent",
       "sk_file": "reference_agent_gemini-2.5-pro-180e514b.sk",
-      "verify_key": "cfaMbgfy5wgn3fgBQ3b0Jeq+dAnTvX4H5pujs4GOlEY="
+      "verify_key": "tzhzBK4W9Ac7Qe2PQj2bPQQkxiY4/WZ/PO3j0rK1n6A="
     }
   },
   "version": "okf-keyring/v1"

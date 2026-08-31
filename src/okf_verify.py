@@ -60,7 +60,9 @@ def check_concept_tamper(
         return True, "concept canonical-hash mismatch"
 
     path = merkle_proof(leaf_hashes, merkle_index)  # REUSE merkle.merkle_proof
-    if not verify_proof(expected_sha256, path, bundle_rec["merkle_root"], merkle_index):  # REUSE
+    if not verify_proof(
+        expected_sha256, path, bundle_rec["merkle_root"], merkle_index, len(leaf_hashes)
+    ):  # REUSE
         return True, "merkle proof failed"
 
     if not verify_root_signature(bundle_rec, publisher_vk):  # REUSE

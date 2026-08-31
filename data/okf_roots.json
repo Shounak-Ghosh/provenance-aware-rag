@@ -2,10 +2,10 @@
   "acme_retail": {
     "bundle": {
       "bundle_id": "acme_retail",
-      "merkle_root": "3353892637c89866c45b6c412100593fd8879976af5eece6ed11b9fed88f6252",
-      "root_signature": "tf/mfyqNc94Ob2MdFC6yCO0CbV9jNIv8yJgK65Pn5r+RQ1f3Q4j4G9W/yCdql8iOqcXFKOuGVr7u2GAzaWg6DQ==",
+      "merkle_root": "26c2500937479d69d04c5b01f09e59942fcde9e88224760f1106eef0c1170618",
+      "root_signature": "DC6yr9rc+Gyr7vzj1wyP86qX5x83xJ/1HZAnY8V4Yk0QmyCntcD2Kwv54tDzEE4nJwvBb4kOC2fQV5FKGl4SCg==",
       "publisher_key_id": "publisher_v1",
-      "signed_at": "2026-08-02T20:17:40.880143+00:00"
+      "signed_at": "2026-08-31T00:30:43.145386+00:00"
     },
     "bundle_path": "bundles/acme_retail",
     "canonicalization": "okf-concept/v1",
@@ -64,7 +64,7 @@
         "actor": "human:jsmith@acme",
         "at": "2026-07-01T09:00:00Z",
         "kind": "verified",
-        "signature": "JFjH3V3qwFv3Kfp6JlmV9Hpp3qODmjW41Wz486xQJqrs7OxBOXqtObRjipI8Inugb3v3LjUDqNZWJ5HDNEy1Bw=="
+        "signature": "vR5LiXP9tPWrj/rlDjK5Ihj3Bq/kS7o8lZKizEtJ0mMjKfNo686coRJ4G+ayEGjaZc6Rq8R9LXLKY4CHnQy7Bg=="
       },
       {
         "bundle_id": "acme_retail",
@@ -72,7 +72,7 @@
         "actor": "reference_agent/gemini-2.5-pro",
         "at": "2026-06-30T14:00:00Z",
         "kind": "generated",
-        "signature": "Eff3lOME2Or/muGSuhDPnl+8e3l/KcsAmOslY6ZPOAibPR/aXrlLW8gm7kp+EsJzEFwOxwMiaW8Isz8tkOiSBg=="
+        "signature": "ZetY2oh5L0RwGqCK9i1hziGYztsOz+lqlq+Pg/9zVUqXkgNmxZhxb0XgR8wPNpnFQcIQA2qqcht8AnL5BkrBCQ=="
       },
       {
         "bundle_id": "acme_retail",
@@ -80,7 +80,7 @@
         "actor": "human:jsmith@acme",
         "at": "2026-07-01T09:00:00Z",
         "kind": "verified",
-        "signature": "qUspCveKiixWS2PRhLPy3xxUqGNQw/h94aDIzCCOMcb0sWmDxib0ZjMZbwenVB553Oe4k/b4GSE8joULggfXDA=="
+        "signature": "kR8QNABbGWbfZlJuMo+wCf8wpKTfNLgGjyh5pK0w3q83SkQK59unkUbcQ5/06DZ6pnlO95lh8N+ArPIgPwWkAQ=="
       },
       {
         "bundle_id": "acme_retail",
@@ -88,7 +88,7 @@
         "actor": "reference_agent/gemini-2.5-pro",
         "at": "2026-06-30T14:00:00Z",
         "kind": "generated",
-        "signature": "bQLGMIWLHG6SnTEIgc9PoO7by6Z3qwjfX9C1kmaubSnkoaxSUF0Dn5NOAFXe+1tgC5bcrIuY6MyHPqyNVpJOAA=="
+        "signature": "s0tYmE2yZi4o2PpWdx+ho+yqT7xDCUhHJX5vP87zzim3S0RhfwHMDrEyOESjgKXtrq8iL1gq26lplDu6VLfmAw=="
       },
       {
         "bundle_id": "acme_retail",
@@ -96,7 +96,7 @@
         "actor": "human:jsmith@acme",
         "at": "2026-07-01T09:00:00Z",
         "kind": "verified",
-        "signature": "d+GBhGef+ZYmdCUE9FnlL0G5GoTUQjXvjHwZD7FiQYo6rdcd0q5U6YM0O0enOYo3S6th00xvUuqgxl+HBnyoDg=="
+        "signature": "xEwa97JkaarH8E9v6yvy3CbX5HgtyId460qUjXffrvQilsAtLgyJzfq9KY3L3VuXJUNMleN8jSh0I1vAtXjDAA=="
       },
       {
         "bundle_id": "acme_retail",
@@ -104,7 +104,7 @@
         "actor": "reference_agent/gemini-2.5-pro",
         "at": "2026-06-30T14:00:00Z",
         "kind": "generated",
-        "signature": "sofDyyuUAgxIzdE2yLwQDTc7AE15P55VCtJRgTu8R2D7n11uHLSn/gWBAb8JmEKnXGlj33Fpuk+c9mEfV3+gCQ=="
+        "signature": "x9/y+jXRUVbL06r4XL84OaCIsayegPYw3a/QWiJxdqlFq6PITmc612Uzo4syEXTxtMniU+QpJK/eQ1xLFDwTBw=="
       },
       {
         "bundle_id": "acme_retail",
@@ -112,7 +112,7 @@
         "actor": "human:jsmith@acme",
         "at": "2024-01-15T10:00:00Z",
         "kind": "verified",
-        "signature": "s6mS2FJdVcosduNNyiEAaoUn352shvsljVWlCtOmWH9Tjg0lCS8KPmqv9V2xBoL2zXZ5cxycnLE/H/zDLnsPAg=="
+        "signature": "b/CTHG+QxdmlA3ZU+YuXjM8dvdZ9gKJ3OtzhR+MKLoqwrttAguJDS6vFm3sQF5TaU8IBDJ2jH4HFiud/YRubBg=="
       },
       {
         "bundle_id": "acme_retail",
@@ -120,7 +120,7 @@
         "actor": "human:jsmith@acme",
         "at": "2024-01-15T10:00:00Z",
         "kind": "generated",
-        "signature": "eZD5e1z4m34uVBdOBfaYQykhVE5Mn3A+2Q9Y4xbBpDiiEiPAMpEZ6g7Y0yNBAG3dZRDISnGmkjPoss4s3EEjCw=="
+        "signature": "uJ+CPnyJs8CPbEPnzw0dJVJVMGXSBg6lwNq4N8YymyiCEkxFdU3B+e3JELo11q4JhD7YrJW785US2kHEMlU+AQ=="
       },
       {
         "bundle_id": "acme_retail",
@@ -128,7 +128,7 @@
         "actor": "human:jsmith@acme",
         "at": "2026-07-01T09:00:00Z",
         "kind": "verified",
-        "signature": "zHIAfo6NM3XabYkXrIGOixoLcaDFHfOuPcYTp5IFjazmqLfVYwrymsRNliaHboUcyK2r8Wfb4Pa+vbzefF+UBg=="
+        "signature": "UcXlM43jI9A1i7QC8B7/tyLB7Zrnznp05LpEtjA/Io4eL81BmCMA/Ji44LtYCZ73cH2D8y3RZy7XwE1waY2XBA=="
       },
       {
         "bundle_id": "acme_retail",
@@ -136,7 +136,7 @@
         "actor": "reference_agent/gemini-2.5-pro",
         "at": "2026-06-30T14:00:00Z",
         "kind": "generated",
-        "signature": "H/K/pYyW5nlve/oy0ICeH8vvyhZ66MWPqM3OXWIuWdWmQirzcuw9i65XjS5Pdt4D3bKbudqwbU1VehUsbtFXAA=="
+        "signature": "AP+zVuyuMDk9kYIM0VZQFhbQmhSU02o8xb1vkqk5nfeDUVMa/1whJUWw6isDLsmOz+Z7x8voZoV4POb1ZKCrDA=="
       },
       {
         "bundle_id": "acme_retail",
@@ -144,7 +144,7 @@
         "actor": "human:jsmith@acme",
         "at": "2026-06-15T09:00:00Z",
         "kind": "verified",
-        "signature": "0l9d6OKfTgCh9QBdSbnd+hVXaPTJcS0WSgm6geFjg4biMJYKh9fcPrAsz8Kxk24KNB61YOZ/4t1nkUQGBeX/DA=="
+        "signature": "GrciY1e+xld3xW2fShPFNaIJ6qcutFDr3F9I/RFS1g6eCf2hWoJAwqbjjYcfioczBFlg6xUViiOOKTdIfSQOCw=="
       },
       {
         "bundle_id": "acme_retail",
@@ -152,7 +152,7 @@
         "actor": "human:jsmith@acme",
         "at": "2026-02-01T10:00:00Z",
         "kind": "generated",
-        "signature": "5VOzuGd8YWZrPSF/Qegg+w3HJILlH+CHk/tEVrGNxzsdTm7u1SzduuFOyWr3oJbWJ4gADy3OvSNJnVTubPq3BA=="
+        "signature": "HnR49ecYmlcKKNLsHqfwGYjmhHCm0y3JqMpj2CVmp5Oiixv7XeQGpHuSBS4pTa2T1cci6inn24XjhN+0F8bHDw=="
       },
       {
         "bundle_id": "acme_retail",
@@ -160,7 +160,7 @@
         "actor": "human:jsmith@acme",
         "at": "2026-06-15T09:00:00Z",
         "kind": "verified",
-        "signature": "ZMkQekpnayrwf7QHdIYeybHoiPwn2K31f/6HIzzUlfAc2bcEQPfNj/wEV3uDaIfxL7+Oc9U6fJnD4YZu19BQDg=="
+        "signature": "tMmabJnGu3dGlUC0VVDVyj6oIAOm7bTmOkqJS8yiYpTYPnlnpxQH8tOtIS59j1KqSpAL1LBAEg9ydRHQEaVxCw=="
       },
       {
         "bundle_id": "acme_retail",
@@ -168,7 +168,7 @@
         "actor": "human:jsmith@acme",
         "at": "2026-01-05T10:00:00Z",
         "kind": "generated",
-        "signature": "tPt1C/MUfIa+m2HBajYpCPXYCukHlSBgmCm3lLcM14VTsH9li7Vc64ZrtHVBvZKYHSa922YfGLVFZnOznsg5CA=="
+        "signature": "Hs/Ziey8xyUcDrp/ewuP4pBa6V2hueaJsjSS+m6GOuR+B0p5+fjVWEizvDf3ib/VV1/iGL2vBzotdHXgGBltBQ=="
       },
       {
         "bundle_id": "acme_retail",
@@ -176,7 +176,7 @@
         "actor": "human:kliu@acme",
         "at": "2026-06-30T14:00:00Z",
         "kind": "generated",
-        "signature": "VTe1y5o6KRDD86Xa7Oq/CxqBnGHqhbY1c6E/z+3HLcqbzLJ1PtgQuR+RVEY+pAIzXYiNkb4U4x82lmVjsZKwCw=="
+        "signature": "WBnQKEsm9fkDV3/GLCDBUe+nA5EXMKDjeKcOAzJeP4LWjTS63AFRyTC9ZGBSGGU3edxsWeJv3+W6knHCStIwBg=="
       },
       {
         "bundle_id": "acme_retail",
@@ -184,7 +184,7 @@
         "actor": "human:kliu@acme",
         "at": "2026-07-01T16:00:00Z",
         "kind": "verified",
-        "signature": "6bdIC/8sLHqzDUx0GutE/hqJAhllVXEhlfct6mQntmQYuyCDzEKhiTbdLpGhKKyMLt9CaKQv+7mkBqIze5MpDg=="
+        "signature": "aL82A0MBV3hhHNJ8RlrADQ6+jQ5uT+d70e6fZ/PKdSAEDtLdFFg2QrcVBV+DYNV2hKehRr9kECK6mhGJkMOACQ=="
       },
       {
         "bundle_id": "acme_retail",
@@ -192,7 +192,7 @@
         "actor": "reference_agent/gemini-2.5-pro",
         "at": "2026-06-30T14:00:00Z",
         "kind": "generated",
-        "signature": "XRJHql7YlegOHF/192mvimi1H8wsEgxG0z2GZU8nFtdjhvxeN71d4PmKuaYBxhOBdoV77UloZ4Jg5+Oz+sWYCQ=="
+        "signature": "jMXhb3FZeBY5LKVMM7/5Pln6eBhYInqbwfG5pi0KXBUVy3V+WXWWCwwDSOtWuZ+cEWRkp6yi4YTrewN/4rezCg=="
       }
     ],
     "computation_pins": [
@@ -201,14 +201,14 @@
         "computation_sha256": "d1f76cb93bcf69dc87ee721b91ef8d1478df7a4b0aa9ec86ef1abda9e56934bd",
         "attester_sha256": "79477f129616163080b57fcf0f6824912403e2426aee68cad47fd9cdd0fc9b9b",
         "attester_resource": "attesters/sql_equality.py",
-        "pins_signature": "9BXZZmQhefFoC2cJeycxFf0LhkdK7hcVjNkUrNNXTHTxR4qeL4rqNgYCBCTVuyht3mh/gnEeeOoYY6XeHhr2AQ=="
+        "pins_signature": "vXUhex5G7qVKLGfEslI5/ZHC2QQawmaXljAYHDn+fH3J/ogHkUBGkxa1sOBy0DyPgLVzjnDtHcHhEgi0GnacBQ=="
       },
       {
         "concept_id": "computations/revenue-ytd",
         "computation_sha256": "d1bffc80e9708d2791a8c720f628e024ccbc37994331ef6dad893f7884c5add1",
         "attester_sha256": "79477f129616163080b57fcf0f6824912403e2426aee68cad47fd9cdd0fc9b9b",
         "attester_resource": "attesters/sql_equality.py",
-        "pins_signature": "PvBqGEibUGwx2rm0eiAbw9lZRnE3+xPeI71wUHn+ha6vCvVcCEVEAhde3MPIa6qUhuijg9Ke4xCpV1idrZ3TAA=="
+        "pins_signature": "CTJR4hFKnnuaehmI0tqiW9RQ+X5GxxK/DacTZRzDSgmCrhculjbneNEfx4NCk1MzCRPqxD3tbJ8VkaNfonckCg=="
       }
     ]
   }
