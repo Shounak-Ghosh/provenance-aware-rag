@@ -394,7 +394,7 @@ def test_okf_answer_attestation_signs_the_refused_set(signed_fixture, service_ke
     sk, vk = service_keys
     log = tmp_path / "a.jsonl"
     collection = signed_fixture.collection()
-    result = _agent(signed_fixture, collection, StubLLM("See [tables/orders]."), service_keys, log_path=log)
+    _agent(signed_fixture, collection, StubLLM("See [tables/orders]."), service_keys, log_path=log)
 
     entry = json.loads(log.read_text().splitlines()[-1])
     assert verify_okf_answer(entry, vk) is True

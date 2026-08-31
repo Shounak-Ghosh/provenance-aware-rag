@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pytest
 
-from src.crypto import generate_keypair, sign
+from src.crypto import generate_keypair
 from src.okf import canonical_frontmatter_json, canonicalize_from_parts, parse_bundle
 from src.schema import ConceptRecord
 from src.trust import (

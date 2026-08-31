@@ -137,7 +137,7 @@ def test_resigned_forged_tier_still_downgrades(signed_fixture):
     this module is not redundant with the Day-1 Merkle root -- but the
     authenticated tier still refuses to rise, because no one holding
     human:attacker's key ever signed the claim."""
-    from src.crypto import load_signing_key, sign
+    from src.crypto import sign
     from src.merkle import compute_root
     from src.okf import parse_bundle
 

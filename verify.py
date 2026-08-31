@@ -371,9 +371,9 @@ def main() -> int:
     collection = get_collection()
     if collection.count() == 0:
         print(
-            f"WARNING: Chroma store at data/chroma_db is empty — every cited chunk below "
-            f"will report 'not found in store', which will look identical to a tampered/"
-            f"rewritten hash. Run the app or main.py once to ingest the corpus first.\n"
+            "WARNING: Chroma store at data/chroma_db is empty — every cited chunk below "
+            "will report 'not found in store', which will look identical to a tampered/"
+            "rewritten hash. Run the app or main.py once to ingest the corpus first.\n"
         )
 
     if not ROOTS_PATH.exists():
