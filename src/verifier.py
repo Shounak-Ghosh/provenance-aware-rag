@@ -11,7 +11,7 @@ def find_chunk_by_hash(chunk_hash: str, collection: chromadb.Collection) -> dict
 
     This is the ONLY mechanism recovering which document/chunk a bare hash
     from Attestation.chunk_hashes belongs to — the schema carries no chunk_id
-    or doc_id, by design (frozen Day 4). Returns None if no chunk in the
+    or doc_id, by design (see src/schema.py's Attestation). Returns None if no chunk in the
     CURRENT store carries this hash — itself a tamper signal: a sophisticated
     attacker who rewrites both a chunk's text and its stored hash (see
     src/store.py's corrupt_chunk(update_hash=True)) makes the original attested

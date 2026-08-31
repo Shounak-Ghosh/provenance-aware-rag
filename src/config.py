@@ -10,7 +10,7 @@ EMBED_MODEL_NAME = "BAAI/bge-small-en-v1.5"
 LLM_MODEL = os.getenv("LLM_MODEL", "gpt-4o-mini")  # set in .env; switch to gpt-4o for demo
 LLM_TEMPERATURE = 0
 
-# ── Provenance config (frozen Day 4) ─────────────────────────────────────────
+# ── Provenance config (frozen; changing a key ID invalidates existing signatures) ──
 PUBLISHER_KEY_ID = "publisher_v1"
 SERVICE_KEY_ID   = "service_v1"
 

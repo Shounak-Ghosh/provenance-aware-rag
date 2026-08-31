@@ -23,7 +23,7 @@ WHAT THIS ADDS THAT NOTHING UPSTREAM DOES
 2. It is the first code to act on the claimed-vs-authenticated trust
    comparison. src.trust has computed both the claimed tier (what a
    signal-trusting consumer such as the bundle's own viz.html displays) and the
-   signature-backed tier since Day 2; nothing consumed the difference. The demo
+   signature-backed tier; nothing consumed the difference before this check. The demo
    sentence is exactly this: a signal-trusting consumer serves the concept, the
    verifying agent refuses it and names the actor whose signature was missing.
 3. Its answer attestation signs the REFUSED set alongside the admitted one, so

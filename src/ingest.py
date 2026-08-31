@@ -96,7 +96,7 @@ def ingest(
 
     Chunk IDs follow the scheme ``{doc_id}__chunk{j:03d}``. CHUNK_SIZE and
     CHUNK_OVERLAP are pinned in config and must never change after the first
-    ingest run — the Day 5 SHA-256 hashes are computed over chunk text, so any
+    ingest run — the SHA-256 hashes are computed over chunk text, so any
     splitter change would silently invalidate every stored hash.
     """
     if collection.count() > 0:

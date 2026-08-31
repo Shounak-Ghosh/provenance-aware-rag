@@ -31,8 +31,8 @@ def generate(
 
     The prompt instructs the model to embed chunk IDs inline as ``[chunk_id]``.
     Call ``parse_citations()`` on the returned string to extract those IDs.
-    The Day 10 answer hook will extend this to sign the answer + chunk hashes
-    into an attestation object.
+    The answer hook (src/attestation.py) signs the answer + chunk hashes into
+    an attestation object.
 
     The three keyword-only parameters let a different corpus reuse this call
     unchanged: src/enforce.py passes the OKF prompts and a concept formatter so
@@ -57,7 +57,7 @@ def parse_citations(answer: str) -> list[str]:
 
     Returns IDs in first-appearance order with duplicates removed. These are
     non-cryptographic citations — integrity is not verified here; that is the
-    job of the Day 5–8 read hook.
+    job of the read hook (src/verifier.py / src/merkle.py's check_tamper).
     """
     return list(dict.fromkeys(CITATION_RE.findall(answer)))
 
