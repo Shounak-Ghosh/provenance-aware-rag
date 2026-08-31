@@ -1,9 +1,19 @@
 [project]
 name = "provenance-aware-rag"
 version = "0.1.0"
-description = "Add your description here"
+description = "Cryptographically enforceable trust for OKF knowledge bundles, checked at the point an agent consumes a concept, not at rest."
 readme = "README.md"
 requires-python = ">=3.12"
+license = "Apache-2.0"
+authors = [{ name = "Shounak Ghosh", email = "subuddhi8@gmail.com" }]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: Security :: Cryptography",
+]
 dependencies = [
     "arxiv>=4.0.0",
     "chromadb>=1.5.9",
@@ -17,9 +27,14 @@ dependencies = [
     "torchvision>=0.27.1",
 ]
 
+[project.urls]
+Repository = "https://github.com/Shounak-Ghosh/provenance-aware-rag"
+Issues = "https://github.com/Shounak-Ghosh/provenance-aware-rag/issues"
+
 [dependency-groups]
 dev = [
     "pytest>=8.0.0",
+    "ruff>=0.9.0",
 ]
 
 [project.optional-dependencies]
@@ -37,3 +52,12 @@ intoto = [
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
+
+[tool.ruff]
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+# E402: app.py/main.py/main_okf.py deliberately call load_dotenv() before any
+# `src.*` import, since src.config reads env vars at import time.
+ignore = ["E402"]
