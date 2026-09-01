@@ -15,9 +15,19 @@ from src.crypto import generate_keypair, save_keypair
 
 
 def _generate(sk_path: Path, vk_path: Path, name: str) -> None:
-    if sk_path.exists() or vk_path.exists():
+    if sk_path.exists() and vk_path.exists():
         print(f"[SKIP] {name} keys already exist — delete manually to regenerate.")
         return
+    if vk_path.exists() != sk_path.exists():
+        present, missing = (vk_path, sk_path) if vk_path.exists() else (sk_path, vk_path)
+        sys.exit(
+            f"[ERROR] {name}: {present} exists but {missing} does not. This looks like a "
+            f"fresh checkout, not a fresh machine — {vk_path.name} is committed to git but "
+            f"{sk_path.name} never is. Generating a new keypair here would not match the "
+            f"committed {vk_path.name} or any data already signed with the original key. "
+            f"Transfer the real {sk_path.name} from wherever these keys were first generated "
+            f"(a password manager or direct machine-to-machine copy — never git)."
+        )
     sk, _ = generate_keypair()
     save_keypair(sk, sk_path, vk_path)
     print(f"[OK]   {name} private key → {sk_path}")

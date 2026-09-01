@@ -29,5 +29,25 @@ jobs:
       - name: Test
         run: uv run pytest -q
 
+      - name: Provision signing keys
+        env:
+          PUBLISHER_SK_B64: ${{ secrets.PUBLISHER_SIGNING_KEY_B64 }}
+          SERVICE_SK_B64: ${{ secrets.SERVICE_SIGNING_KEY_B64 }}
+        run: |
+          if [ -z "$PUBLISHER_SK_B64" ]; then
+            echo "No signing-key secrets available in this context (expected on fork PRs) -- skipping."
+            exit 0
+          fi
+          mkdir -p data/keys
+          printf '%s' "$PUBLISHER_SK_B64" | base64 -d > data/keys/publisher.sk
+          printf '%s' "$SERVICE_SK_B64" | base64 -d > data/keys/service.sk
+          chmod 600 data/keys/publisher.sk data/keys/service.sk
+
       - name: No-key demo smoke test
-        run: bash scripts/demo.sh
+        run: |
+          if [ -f data/keys/publisher.sk ]; then
+            bash scripts/demo.sh
+          else
+            echo "Signing keys unavailable in this context; running dry-run ingest only."
+            uv run python -m src.okf_ingest bundles/acme_retail --dry-run
+          fi

@@ -1,7 +1,7 @@
 # OKF-Verify
 
 [![CI](https://github.com/Shounak-Ghosh/provenance-aware-rag/actions/workflows/ci.yml/badge.svg)](https://github.com/Shounak-Ghosh/provenance-aware-rag/actions/workflows/ci.yml)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/Shounak-Ghosh/provenance-aware-rag/badge)](https://scorecard.dev/viewer/?uri=github.com/Shounak-Ghosh/provenance-aware-rag)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Shounak-Ghosh/provenance-aware-rag/badge)](https://scorecard.dev/viewer/?uri=github.com/Shounak-Ghosh/provenance-aware-rag)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 **Cryptographically enforceable trust for [OKF](https://github.com/GoogleCloudPlatform/knowledge-catalog)
