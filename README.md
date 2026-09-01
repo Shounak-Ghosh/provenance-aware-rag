@@ -1,5 +1,9 @@
 # OKF-Verify
 
+[![CI](https://github.com/Shounak-Ghosh/provenance-aware-rag/actions/workflows/ci.yml/badge.svg)](https://github.com/Shounak-Ghosh/provenance-aware-rag/actions/workflows/ci.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/Shounak-Ghosh/provenance-aware-rag/badge)](https://scorecard.dev/viewer/?uri=github.com/Shounak-Ghosh/provenance-aware-rag)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+
 **Cryptographically enforceable trust for [OKF](https://github.com/GoogleCloudPlatform/knowledge-catalog)
 v0.2 knowledge bundles — checked at the moment an agent consumes a concept, not at rest.**
 
@@ -81,7 +85,7 @@ uv run python verify.py --okf-bundle bundles/acme_retail
 ```
 
 ```
-[1] Merkle root recomputation ... ✅ MATCHES  3353892637c8…
+[1] Merkle root recomputation ... ✅ MATCHES  26c250093747…
 [2] Bundle root signature (publisher_v1) ... ✅ VALID
 [3] Concept set (9 signed / 9 on disk) ... ✅ no additions or removals
 [4] Per-concept integrity + authenticated trust (9 concepts)
@@ -204,6 +208,9 @@ attacks work on the sample bundle the spec authors ship.
 
 ## Repo map
 
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for a diagram of how the pieces below fit into one
+trust boundary, from publish time through consumption to independent verification.
+
 ```
 src/
   okf.py          parse a bundle; canonicalize a concept to deterministic bytes
@@ -238,4 +245,5 @@ runs but do not sandbox it — bundle code executes in-process, and §12 defers 
 closure is one level deep. There is no TUF-style snapshot role, so an old, authentically signed
 bundle still verifies. And key rotation, revocation, delegation, and thresholds are unimplemented:
 *which identities may sign which concepts* is the open problem this work is meant to motivate, not
-one it solves.
+one it solves. See [docs/OKF_COMPATIBILITY.md](docs/OKF_COMPATIBILITY.md) for exactly which OKF v0.2
+semantics this project assumes.
